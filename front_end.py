@@ -18,7 +18,7 @@ class ChessGUI:
             host="localhost",
             user="root",
             password="maggie", 
-            database="chessboard"
+            database="fogofwar"
         )
         self.cursor = self.connection.cursor()
 
@@ -138,7 +138,7 @@ class ChessGUI:
             ('H', 8, 'B', 'R', True)
         ]
 
-        query = "INSERT INTO chess (col, rw, color, piece, vis) VALUES (%s, %s, %s, %s, %s)"
+        query = "INSERT INTO chessboard (col, rw, color, piece, vis) VALUES (%s, %s, %s, %s, %s)"
         self.cursor.executemany(query, initial_setup)
         self.connection.commit()
 
@@ -228,19 +228,19 @@ class ChessGUI:
 
         # Clear the 'from' position in the database
         self.cursor.execute(
-            "UPDATE chess SET piece = "", WHERE col = %s AND rw = %s",
+            "UPDATE chessboard SET color = '', piece = '' WHERE col = %s AND rw = %s",
             (from_col, from_row)
         )
         
         if self.is_white_turn:
         # Set the 'to' position in the database
             self.cursor.execute(
-                "UPDATE chess SET color = 'W', piece = %s WHERE col = %s AND rw = %s",
+                "UPDATE chessboard SET color = 'W', piece = %s WHERE col = %s AND rw = %s",
                 (piece, to_col, to_row)
             )
         else:
             self.cursor.execute(
-                "UPDATE chess SET color = 'B', piece = %s WHERE col = %s AND rw = %s",
+                "UPDATE chessboard SET color = 'B', piece = %s WHERE col = %s AND rw = %s",
                 (piece, to_col, to_row)
             )
 
@@ -268,6 +268,8 @@ class ChessGUI:
         """Print the current board state (for debugging purposes)."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
+        for row in results:
+            print(row)  # Print each row to the console
 
 if __name__ == "__main__":
     root = tk.Tk()

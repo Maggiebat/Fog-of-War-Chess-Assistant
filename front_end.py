@@ -65,32 +65,84 @@ class ChessGUI:
         self.root.quit()
         print("Game ended")
 
-    # def reset_board(self):
-    #     # Delete all existing rows in the chess table
-    #     self.cursor.execute("TRUNCATE TABLE chess")
+    def reset_board(self):
+        # Delete all existing rows in the chess table
+        self.cursor.execute("TRUNCATE TABLE chessboard")
 
-    #     # Repopulate the table with the initial chessboard setup and set visible to TRUE
-    #     initial_setup = [
-    #         ('A', 1, 'WR1', False, True), ('B', 1, 'WN', False, True), ('C', 1, 'WB', False, True),
-    #         ('D', 1, 'WQ', False, True), ('E', 1, 'WK', False, True), ('F', 1, 'WB', False, True),
-    #         ('G', 1, 'WN', False, True), ('H', 1, 'WR2', False, True),
-    #         ('A', 2, 'WP1', False, True), ('B', 2, 'WP2', False, True), ('C', 2, 'WP3', False, True),
-    #         ('D', 2, 'WP4', False, True), ('E', 2, 'WP5', False, True), ('F', 2, 'WP6', False, True),
-    #         ('G', 2, 'WP7', False, True), ('H', 2, 'WP8', False, True),
-    #         # Black pieces setup
-    #         ('A', 8, 'BR1', False, True), ('B', 8, 'BN', False, True), ('C', 8, 'BB', False, True),
-    #         ('D', 8, 'BQ', False, True), ('E', 8, 'BK', False, True), ('F', 8, 'BB', False, True),
-    #         ('G', 8, 'BN', False, True), ('H', 8, 'BR2', False, True),
-    #         ('A', 7, 'BP1', False, True), ('B', 7, 'BP2', False, True), ('C', 7, 'BP3', False, True),
-    #         ('D', 7, 'BP4', False, True), ('E', 7, 'BP5', False, True), ('F', 7, 'BP6', False, True),
-    #         ('G', 7, 'BP7', False, True), ('H', 7, 'BP8', False, True)
-    #     ]
+        # Repopulate the table with the initial chessboard setup and set visible to TRUE
+        initial_setup = [
+            ('A', 1, 'W', 'R', True),
+            ('B', 1, 'W', 'N', True),
+            ('C', 1, 'W', 'B', True),
+            ('D', 1, 'W', 'Q', True),
+            ('E', 1, 'W', 'K', True),
+            ('F', 1, 'W', 'B', True),
+            ('G', 1, 'W', 'N', True),
+            ('H', 1, 'W', 'R', True),
+            ('A', 2, 'W', 'P', True),
+            ('B', 2, 'W', 'P', True),
+            ('C', 2, 'W', 'P', True),
+            ('D', 2, 'W', 'P', True),
+            ('E', 2, 'W', 'P', True),
+            ('F', 2, 'W', 'P', True),
+            ('G', 2, 'W', 'P', True),
+            ('H', 2, 'W', 'P', True),
+            ('B', 3, '', '', True),
+            ('C', 3, '', '', True),
+            ('D', 3, '', '', True),
+            ('A', 3, '', '', True),
+            ('E', 3, '', '', True),
+            ('F', 3, '', '', True),
+            ('G', 3, '', '', True),
+            ('H', 3, '', '', True),
+            ('H', 3, '', '', True),
+            ('A', 4, '', '', True),
+            ('B', 4, '', '', True),
+            ('C', 4, '', '', True),
+            ('D', 4, '', '', True),
+            ('E', 4, '', '', True),
+            ('F', 4, '', '', True),
+            ('G', 4, '', '', True),
+            ('H', 4, '', '', True),
+            ('A', 5, '', '', True),
+            ('B', 5, '', '', True),
+            ('C', 5, '', '', True),
+            ('D', 5, '', '', True),
+            ('E', 5, '', '', True),
+            ('F', 5, '', '', True),
+            ('G', 5, '', '', True),
+            ('H', 5, '', '', True),
+            ('A', 6, '', '', True),
+            ('B', 6, '', '', True),
+            ('C', 6, '', '', True),
+            ('D', 6, '', '', True),
+            ('E', 6, '', '', True),
+            ('F', 6, '', '', True),
+            ('G', 6, '', '', True),
+            ('H', 6, '', '', True),
+            ('A', 7, 'B', 'P', True),
+            ('B', 7, 'B', 'P', True),
+            ('C', 7, 'B', 'P', True),
+            ('D', 7, 'B', 'P', True),
+            ('E', 7, 'B', 'P', True),
+            ('F', 7, 'B', 'P', True),
+            ('G', 7, 'B', 'P', True),
+            ('H', 7, 'B', 'P', True),
+            ('A', 8, 'B', 'R', True),
+            ('B', 8, 'B', 'N', True),
+            ('C', 8, 'B', 'B', True),
+            ('D', 8, 'B', 'Q', True),
+            ('E', 8, 'B', 'K', True),
+            ('F', 8, 'B', 'B', True),
+            ('G', 8, 'B', 'N', True),
+            ('H', 8, 'B', 'R', True)
+        ]
 
-    #     query = "INSERT INTO chess (`column`, `row`, `piece`, `empty`, `visible`) VALUES (%s, %s, %s, %s, %s)"
-    #     self.cursor.executemany(query, initial_setup)
-    #     self.connection.commit()
+        query = "INSERT INTO chess (col, rw, color, piece, vis) VALUES (%s, %s, %s, %s, %s)"
+        self.cursor.executemany(query, initial_setup)
+        self.connection.commit()
 
-    #     print("Board has been reset to initial state with all pieces visible.")
+        print("Board has been reset to initial state with all pieces visible.")
 
     # Loads the photos so that the GUI has chess pieces on the board
     def load_piece_images(self):
@@ -195,39 +247,21 @@ class ChessGUI:
             winner = "White" if not self.is_white_turn else "Black"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
             self.reset_board()
-            self.cursor.execute(
-                "DROP TABLE chessboard"
-            )
             return True
         elif self.board.is_stalemate():
             messagebox.showinfo("Stalemate", "It's a draw!")
             self.reset_board()
-            self.cursor.execute(
-                "DROP TABLE chessboard"
-            )
             return True
         elif self.board.is_insufficient_material():
             messagebox.showinfo("Draw", "Insufficient material for checkmate!")
             self.reset_board()
-            self.cursor.execute(
-                    "DROP TABLE chessboard"
-                )
             return True
         return False
 
     def print_board_state(self):
         """Print the current board state (for debugging purposes)."""
-        print(self.board)
-
-        self.cursor.execute("SELECT * FROM chess ORDER BY `row` DESC, `column`;")
+        self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
-        for row in results:
-            column, row_num, piece_name, _, _ = row  # Unpack values for clarity
-            # Check if piece_name is None
-            if piece_name is None:
-                print(f"({column}, {row_num}, None, 1, 1)")
-            else:
-                print(f"({column}, {row_num}, {piece_name}, 0, 1)")
 
 if __name__ == "__main__":
     root = tk.Tk()

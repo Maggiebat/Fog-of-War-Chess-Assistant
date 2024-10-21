@@ -185,9 +185,12 @@ class ChessGUI:
 
     def on_square_click(self, event):
         """Handle click events to select and move pieces."""
-        col = event.x // self.square_size
-        row = event.y // self.square_size
-        clicked_square = chess.square(col, 7 - row)
+        col = 7-(event.x // self.square_size)
+        row = 7-(event.y // self.square_size)
+        col = 7 - col # reverse the column mapping
+        clicked_square = chess.square(col, row)
+        # debug
+        print(f"Clicked at: x={event.x}, y={event.y}, col={col}, row={row}, clicked_square={clicked_square}")
 
         if self.selected_square is None:
             # Select the piece if any
@@ -219,9 +222,9 @@ class ChessGUI:
     def update_database(self, from_square, to_square):
         """Update the MySQL database after a move."""
         from_col = chr(chess.square_file(from_square) + ord('A'))
-        from_row = 8 - chess.square_rank(from_square)
+        from_row = chess.square_rank(from_square) + 1
         to_col = chr(chess.square_file(to_square) + ord('A'))
-        to_row = 8 - chess.square_rank(to_square)
+        to_row = chess.square_rank(to_square) + 1
 
         # Get the piece to move
         piece = self.board.piece_at(to_square).symbol().upper()

@@ -228,15 +228,21 @@ class ChessGUI:
 
         # Clear the 'from' position in the database
         self.cursor.execute(
-            "UPDATE chess SET piece = NULL, `empty` = TRUE WHERE `column` = %s AND `row` = %s",
+            "UPDATE chess SET piece = "", WHERE col = %s AND rw = %s",
             (from_col, from_row)
         )
-
+        
+        if self.is_white_turn:
         # Set the 'to' position in the database
-        self.cursor.execute(
-            "UPDATE chess SET piece = %s, `empty` = FALSE WHERE `column` = %s AND `row` = %s",
-            (piece, to_col, to_row)
-        )
+            self.cursor.execute(
+                "UPDATE chess SET color = 'W', piece = %s WHERE col = %s AND rw = %s",
+                (piece, to_col, to_row)
+            )
+        else:
+            self.cursor.execute(
+                "UPDATE chess SET color = 'B', piece = %s WHERE col = %s AND rw = %s",
+                (piece, to_col, to_row)
+            )
 
         # Commit the changes
         self.connection.commit()

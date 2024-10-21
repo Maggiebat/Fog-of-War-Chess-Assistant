@@ -77,12 +77,9 @@ VALUES
 
 SELECT * FROM chessboard;
 
-# UPDATE chess SET color = '', piece = '' WHERE col = %s AND rw = %s
+-- UPDATE chess SET color = '', piece = '' WHERE col = %s AND rw = %s
 
-# we would need to set the color system based on if it is player 1 or player 2's turn and make the %s go to CAP
-# UPDATE chess SET color = '--based on player turn--', piece = %s.upper() WHERE col = %s AND rw = %s
-
-# DROP TABLE chessboard
+-- UPDATE chess SET color = '--based on player turn--', piece = %s.upper() WHERE col = %s AND rw = %s
 
 
 

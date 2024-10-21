@@ -55,6 +55,7 @@ class ChessGUI:
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
 
+
     def quit_game(self):
         # Resets the SQL table
         self.reset_board()
@@ -64,32 +65,32 @@ class ChessGUI:
         self.root.quit()
         print("Game ended")
 
-    def reset_board(self):
-        # Delete all existing rows in the chess table
-        self.cursor.execute("TRUNCATE TABLE chess")
+    # def reset_board(self):
+    #     # Delete all existing rows in the chess table
+    #     self.cursor.execute("TRUNCATE TABLE chess")
 
-        # Repopulate the table with the initial chessboard setup and set visible to TRUE
-        initial_setup = [
-            ('A', 1, 'WR1', False, True), ('B', 1, 'WN', False, True), ('C', 1, 'WB', False, True),
-            ('D', 1, 'WQ', False, True), ('E', 1, 'WK', False, True), ('F', 1, 'WB', False, True),
-            ('G', 1, 'WN', False, True), ('H', 1, 'WR2', False, True),
-            ('A', 2, 'WP1', False, True), ('B', 2, 'WP2', False, True), ('C', 2, 'WP3', False, True),
-            ('D', 2, 'WP4', False, True), ('E', 2, 'WP5', False, True), ('F', 2, 'WP6', False, True),
-            ('G', 2, 'WP7', False, True), ('H', 2, 'WP8', False, True),
-            # Black pieces setup
-            ('A', 8, 'BR1', False, True), ('B', 8, 'BN', False, True), ('C', 8, 'BB', False, True),
-            ('D', 8, 'BQ', False, True), ('E', 8, 'BK', False, True), ('F', 8, 'BB', False, True),
-            ('G', 8, 'BN', False, True), ('H', 8, 'BR2', False, True),
-            ('A', 7, 'BP1', False, True), ('B', 7, 'BP2', False, True), ('C', 7, 'BP3', False, True),
-            ('D', 7, 'BP4', False, True), ('E', 7, 'BP5', False, True), ('F', 7, 'BP6', False, True),
-            ('G', 7, 'BP7', False, True), ('H', 7, 'BP8', False, True)
-        ]
+    #     # Repopulate the table with the initial chessboard setup and set visible to TRUE
+    #     initial_setup = [
+    #         ('A', 1, 'WR1', False, True), ('B', 1, 'WN', False, True), ('C', 1, 'WB', False, True),
+    #         ('D', 1, 'WQ', False, True), ('E', 1, 'WK', False, True), ('F', 1, 'WB', False, True),
+    #         ('G', 1, 'WN', False, True), ('H', 1, 'WR2', False, True),
+    #         ('A', 2, 'WP1', False, True), ('B', 2, 'WP2', False, True), ('C', 2, 'WP3', False, True),
+    #         ('D', 2, 'WP4', False, True), ('E', 2, 'WP5', False, True), ('F', 2, 'WP6', False, True),
+    #         ('G', 2, 'WP7', False, True), ('H', 2, 'WP8', False, True),
+    #         # Black pieces setup
+    #         ('A', 8, 'BR1', False, True), ('B', 8, 'BN', False, True), ('C', 8, 'BB', False, True),
+    #         ('D', 8, 'BQ', False, True), ('E', 8, 'BK', False, True), ('F', 8, 'BB', False, True),
+    #         ('G', 8, 'BN', False, True), ('H', 8, 'BR2', False, True),
+    #         ('A', 7, 'BP1', False, True), ('B', 7, 'BP2', False, True), ('C', 7, 'BP3', False, True),
+    #         ('D', 7, 'BP4', False, True), ('E', 7, 'BP5', False, True), ('F', 7, 'BP6', False, True),
+    #         ('G', 7, 'BP7', False, True), ('H', 7, 'BP8', False, True)
+    #     ]
 
-        query = "INSERT INTO chess (`column`, `row`, `piece`, `empty`, `visible`) VALUES (%s, %s, %s, %s, %s)"
-        self.cursor.executemany(query, initial_setup)
-        self.connection.commit()
+    #     query = "INSERT INTO chess (`column`, `row`, `piece`, `empty`, `visible`) VALUES (%s, %s, %s, %s, %s)"
+    #     self.cursor.executemany(query, initial_setup)
+    #     self.connection.commit()
 
-        print("Board has been reset to initial state with all pieces visible.")
+    #     print("Board has been reset to initial state with all pieces visible.")
 
     # Loads the photos so that the GUI has chess pieces on the board
     def load_piece_images(self):
@@ -194,14 +195,23 @@ class ChessGUI:
             winner = "White" if not self.is_white_turn else "Black"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
             self.reset_board()
+            self.cursor.execute(
+                "DROP TABLE chessboard"
+            )
             return True
         elif self.board.is_stalemate():
             messagebox.showinfo("Stalemate", "It's a draw!")
             self.reset_board()
+            self.cursor.execute(
+                "DROP TABLE chessboard"
+            )
             return True
         elif self.board.is_insufficient_material():
             messagebox.showinfo("Draw", "Insufficient material for checkmate!")
             self.reset_board()
+            self.cursor.execute(
+                    "DROP TABLE chessboard"
+                )
             return True
         return False
 

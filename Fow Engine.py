@@ -14,31 +14,19 @@ def run_engine(self):
         if self.check_game_over():
             break
 
-        self.evaluate_moves(k=5, depth=3)
-        #COMMENTED OUT FOR NOW
-        ## ##self.cursor.execute("SELECT col, rw, color, piece FROM visible_chessboard ORDER BY probability DESC LIMIT 1;")
-        ##opponent_move = self.cursor.fetchone()
+       #step 1: read in visible table from front end, if it's the first move populate the table with all starting positions, track moves we made or can see 
+        #step 2: if it's after first move, calculate where opponent might have their pieces, ignore otherwise
+        #step 3: update the piece table with lesser probability for all positions of top k opponent moves,update "known" positions prob
+        #step 4: parse through all possible moves from the piece tracking table, testing depth only needs to be like 3 or so right now
+        #step 5: decide on the move that produces the optimal scoring for the player, then print/send this move back to GUI
+        #step 6: wait on some kind of signal from front end to reset this process, end game when front end tells us it's over
 
-        if opponent_move:
-            from_col = opponent_move[0]
-            from_row = opponent_move[1]
-            piece_color = opponent_move[2]
-            piece = opponent_move[3]
+        #notes: our table cannot access the data from the game on where the opponents are if they arent visible (duh)
+        #this engine will not make moves or send any information back to the front end, other than a reccomendation
+        #it would be cool to visually represent where the engine is predicting the opponents pieces somehow, so we can compare how it's performing with reality
 
-            # Check if the move is known or unknown
-            if piece_color == "unknown":
-                move_description = "Unknown"
-            else:
-                # Convert from_col and from_row to a move
-                move = self.convert_to_move(from_col, from_row)
-                if move:
-                    # Execute the move
-                    self.board.push(move)
-                    self.update_pieces()  # Update GUI
-
-                    # Log the move in history
-                    move_description = f"{piece_color} moved {piece} from {from_col}{from_row} to {move.to_square}."
-                    self.track_move(move_description)
+       
+                   
 
     self.suggest_player_move()
 

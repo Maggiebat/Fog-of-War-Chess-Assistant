@@ -1,5 +1,8 @@
 import chess
-
+###################################################################################################
+####A LOT OF THIS IS PLACEHOLDER/GENERAL IDEA OF WHAT THIS SHOULD USE/WHAT IT NEEDS, 
+##MANY OF THESE FUNCTIONS WILL NOT PROPERLY INTEARCT WITH EACH OTHER, MANY THINGS ARE INCOMPLETE
+########################################################################################################
 def run_engine(self):
     """Main loop for the chess engine."""
     self.initialize_visible_pieces()
@@ -10,7 +13,7 @@ def run_engine(self):
             break
 
         self.evaluate_moves(k=5, depth=3)
-
+        #COMMENTED OUT FOR NOW
         ## ##self.cursor.execute("SELECT col, rw, color, piece FROM visible_chessboard ORDER BY probability DESC LIMIT 1;")
         ##opponent_move = self.cursor.fetchone()
 
@@ -121,7 +124,7 @@ def evaluate_moves(self, k=5, depth=3):
     opponent_color = chess.WHITE if self.is_white_turn else chess.BLACK
     top_moves = []
 
-    # Evaluate moves for opponent pieces
+    # Evaluate moves for opponent pieces I DONT THINK THIS INTERACTS PROPERLY WITH MINIMAX, WILL PROBABLY NEED TO ALTER MINIMAX FURTHER TO GET TOP OPPONENT MOVES
     for square in board.legal_moves:
         piece = board.piece_at(square)
 
@@ -138,12 +141,14 @@ def evaluate_moves(self, k=5, depth=3):
     # Sort moves by score and take the top k
     top_moves = sorted(top_moves, key=lambda x: x[1], reverse=True)[:k]
 
-    # Update probabilities for the current positions and insert new moves
+    # Update probabilities for the current positions and insert new moves THIS WILL ALSO NEED A WAY TO REMOVE OUR "GUESS" 
+    #PIECES FROM THE DATASHEET IN THE EVENT THAT WE ACTUALLY SEE WHERE IT WAS MOVED TO: DO WE NEED TO ALTER PIECE TYPES FURTHER (BISHOP1, BISHOP2)
+    #IS THERE A WAY TO LOG POSSIBLE MOVES A TRACE THEM BACK TO ITS VISIBLE POSITION?
     for move, score in top_moves:
         from_square = move.from_square
         to_square = move.to_square
 
-        # Update current position probability to 0.5
+        # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
         from_col = chr(chess.square_file(from_square) + ord('A'))
         from_row = chess.square_rank(from_square) + 1
         self.cursor.execute("""
@@ -169,7 +174,9 @@ def evaluate_moves(self, k=5, depth=3):
     # Commit changes
     self.connection.commit()
     print("Moves evaluated and visible_chessboard updated with new probabilities.")
-
+    ###################################################################################################
+#THIS FUNCTION ORIGINALLY WORKS BY EVALUATING THE WHOLE BOARD BUT OUR EVAL FUNCTION ONLY RATES PIECE POSITION
+##########################################################################################################
 def minimax(self, depth, maximizing_player):
     """Minimax algorithm to evaluate moves with scoring."""
     if depth == 0 or self.check_game_over():
@@ -217,7 +224,7 @@ def suggest_player_move(self):
 def evaluate_board(self):
     """Evaluate the current board state based on piece value, position, and probability."""
     evaluation = 0
-
+    #IM NOT 100% POSITIVE THIS DOES WHAT I WANT IT TO IT ONLY EVALUATES THE SCORE OF THE PIECE POSITION * THE PROBABILITY THAT IT IS THERE
     for square in chess.SQUARES:
         piece = self.board.piece_at(square)
         if piece:
@@ -231,7 +238,7 @@ def evaluate_board(self):
             probability_result = self.cursor.fetchone()
             probability_score = probability_result[0] if probability_result else 1.0  # Default to 1.0 if not found
 
-            # Combine scores
+            # Combine scores HERE
             score = (piece_value + position_score) * probability_score
 
             if piece.color:  # White pieces

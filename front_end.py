@@ -46,6 +46,10 @@ class ChessGUI:
         print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
         print_button.pack()
 
+        # Creates a button that prints all legal board moves **can be used later on**
+        print_legal_moves_button = tk.Button(self.root, text="Print Legal Moves", command=self.print_legal_moves)
+        print_legal_moves_button.pack()
+
         # Makes it so you can hit Escape to leave the game
         self.root.bind("<Escape>", lambda event: self.quit_game())
 
@@ -55,6 +59,9 @@ class ChessGUI:
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
 
+    def print_legal_moves(self):
+        legal_moves = list(self.board.legal_moves)
+        print(legal_moves)
 
     def quit_game(self):
         # Resets the SQL table
@@ -120,22 +127,22 @@ class ChessGUI:
             ('F', 6, '', '', True),
             ('G', 6, '', '', True),
             ('H', 6, '', '', True),
-            ('A', 7, 'B', 'P', True),
-            ('B', 7, 'B', 'P', True),
-            ('C', 7, 'B', 'P', True),
-            ('D', 7, 'B', 'P', True),
-            ('E', 7, 'B', 'P', True),
-            ('F', 7, 'B', 'P', True),
-            ('G', 7, 'B', 'P', True),
-            ('H', 7, 'B', 'P', True),
-            ('A', 8, 'B', 'R', True),
-            ('B', 8, 'B', 'N', True),
-            ('C', 8, 'B', 'B', True),
-            ('D', 8, 'B', 'Q', True),
-            ('E', 8, 'B', 'K', True),
-            ('F', 8, 'B', 'B', True),
-            ('G', 8, 'B', 'N', True),
-            ('H', 8, 'B', 'R', True)
+            ('A', 7, 'B', 'p', True),
+            ('B', 7, 'B', 'p', True),
+            ('C', 7, 'B', 'p', True),
+            ('D', 7, 'B', 'p', True),
+            ('E', 7, 'B', 'p', True),
+            ('F', 7, 'B', 'p', True),
+            ('G', 7, 'B', 'p', True),
+            ('H', 7, 'B', 'p', True),
+            ('A', 8, 'B', 'r', True),
+            ('B', 8, 'B', 'n', True),
+            ('C', 8, 'B', 'b', True),
+            ('D', 8, 'B', 'q', True),
+            ('E', 8, 'B', 'k', True),
+            ('F', 8, 'B', 'b', True),
+            ('G', 8, 'B', 'n', True),
+            ('H', 8, 'B', 'r', True)
         ]
 
         query = "INSERT INTO chessboard (col, rw, color, piece, vis) VALUES (%s, %s, %s, %s, %s)"
@@ -175,7 +182,7 @@ class ChessGUI:
             for col in range(8):
                 piece = self.board.piece_at(chess.square(col, 7 - row))
                 if piece:
-                    piece_str = piece.symbol().lower() if piece.color else piece.symbol().upper()
+                    piece_str = piece.symbol().lower() if piece.color else piece.symbol()
                     image = self.piece_images.get(f"{'w' if piece.color else 'b'}{piece_str.lower()}")
                     if image:
                         x = col * self.square_size
@@ -227,7 +234,7 @@ class ChessGUI:
         to_row = chess.square_rank(to_square) + 1
 
         # Get the piece to move
-        piece = self.board.piece_at(to_square).symbol().upper()
+        piece = self.board.piece_at(to_square).symbol()
 
         # Clear the 'from' position in the database
         self.cursor.execute(

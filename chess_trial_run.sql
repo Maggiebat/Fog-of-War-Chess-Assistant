@@ -1,4 +1,4 @@
-USE fogofwar;
+USE fogofwarchessboard;
 
 CREATE TABLE chessboard (
 	col CHAR(1),
@@ -6,6 +6,12 @@ CREATE TABLE chessboard (
     color char(1),
     piece CHAR(1),
 	vis BOOLEAN
+);
+
+CREATE TABLE captured (
+	-- where 0 = player 1 and 1 = player 2
+    player BOOLEAN,
+    piece CHAR(1)
 );
 
 INSERT INTO chessboard(col,rw,color,piece,vis) 
@@ -58,28 +64,24 @@ VALUES
 ('F', 6, '', '', true),
 ('G', 6, '', '', true),
 ('H', 6, '', '', true),
-('A', 7, 'B', 'P', true),
-('B', 7, 'B', 'P', true),
-('C', 7, 'B', 'P', true),
-('D', 7, 'B', 'P', true),
-('E', 7, 'B', 'P', true),
-('F', 7, 'B', 'P', true),
-('G', 7, 'B', 'P', true),
-('H', 7, 'B', 'P', true),
-('A', 8, 'B', 'R', true),
-('B', 8, 'B', 'N', true),
-('C', 8, 'B', 'B', true),
-('D', 8, 'B', 'Q', true),
-('E', 8, 'B', 'K', true),
-('F', 8, 'B', 'B', true),
-('G', 8, 'B', 'N', true),
-('H', 8, 'B', 'R', true);
+('A', 7, 'B', 'p', true),
+('B', 7, 'B', 'p', true),
+('C', 7, 'B', 'p', true),
+('D', 7, 'B', 'p', true),
+('E', 7, 'B', 'p', true),
+('F', 7, 'B', 'p', true),
+('G', 7, 'B', 'p', true),
+('H', 7, 'B', 'p', true),
+('A', 8, 'B', 'r', true),
+('B', 8, 'B', 'n', true),
+('C', 8, 'B', 'b', true),
+('D', 8, 'B', 'q', true),
+('E', 8, 'B', 'k', true),
+('F', 8, 'B', 'b', true),
+('G', 8, 'B', 'n', true),
+('H', 8, 'B', 'r', true);
 
 SELECT * FROM chessboard;
-
--- UPDATE chess SET color = '', piece = '' WHERE col = %s AND rw = %s
-
--- UPDATE chess SET color = '--based on player turn--', piece = %s.upper() WHERE col = %s AND rw = %s
 
 
 

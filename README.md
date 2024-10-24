@@ -1,4 +1,5 @@
 # Fog-of-War-Chess-Assistant
 
-## Bug Tracker
-### YOU CANNOT GET THE PAWN TO THE OTHER SIDE
+front_end.py
+
+chess_trial_run.sql

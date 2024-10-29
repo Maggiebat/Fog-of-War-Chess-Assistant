@@ -66,7 +66,8 @@ class ChessGUI:
 
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
-    # Track dots for move indicators
+        
+        # Track dots for move indicators
         self.move_dots = []
 
     def print_legal_moves(self):

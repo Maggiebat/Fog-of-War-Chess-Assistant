@@ -59,7 +59,7 @@ class ChessGUI:
 
         # Create a button to print the moves made in the game
         self.move_list = []
-        print_moves_button = tk.Button(self.root, text="Print Moves", command=self.print_moves)
+        print_moves_button = tk.Button(self.root, text="Print Move History", command=self.print_moves)
         print_moves_button.pack()
 
         # Track selected square and moves
@@ -67,19 +67,25 @@ class ChessGUI:
 
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
+
+        # Button that suggests move
+        self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
+        self.suggest_move_button.pack()
+        self.update_suggest_button_state()
         
         # Track dots for move indicators
         self.move_dots = []
+
+    def update_suggest_button_state(self):
+        if self.is_white_turn:
+            self.suggest_move_button.config(state=tk.NORMAL)
+        else:
+            self.suggest_move_button.config(state=tk.DISABLED)
 
     def print_legal_moves(self):
         legal_moves = list(self.board.legal_moves)
         print(legal_moves)
         print(len(legal_moves))
-
-    def legal_moves(self):
-        # Returns a list of all legal moves for the current board state
-        legal_moves = list(self.board.legal_moves)
-        return legal_moves
 
     def quit_game(self):
         # Resets the SQL table
@@ -192,10 +198,6 @@ class ChessGUI:
 
     def update_pieces(self):
         """Place pieces on the board according to the current board state."""
-        # calls to recommend a move using "AI"
-        if self.is_white_turn:
-            legal_moves = list(self.board.legal.moves)
-            dummy(legal_moves)
         # Clear all existing pieces from the board
         self.canvas.delete("piece")
         # Place pieces on the board
@@ -249,6 +251,7 @@ class ChessGUI:
 
                 # Switch turns between players
                 self.is_white_turn = not self.is_white_turn
+                self.update_suggest_button_state()
             else:
                 messagebox.showerror("Illegal Move", "That move is not legal.")
 

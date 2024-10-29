@@ -3,6 +3,7 @@ from tkinter import messagebox
 import chess
 import chess.pgn
 import mysql.connector
+from dummy_function import dummy
 import time
 
 class ChessGUI:
@@ -66,13 +67,19 @@ class ChessGUI:
 
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
-    # Track dots for move indicators
+        
+        # Track dots for move indicators
         self.move_dots = []
 
     def print_legal_moves(self):
         legal_moves = list(self.board.legal_moves)
         print(legal_moves)
         print(len(legal_moves))
+
+    def legal_moves(self):
+        # Returns a list of all legal moves for the current board state
+        legal_moves = list(self.board.legal_moves)
+        return legal_moves
 
     def quit_game(self):
         # Resets the SQL table
@@ -185,6 +192,9 @@ class ChessGUI:
 
     def update_pieces(self):
         """Place pieces on the board according to the current board state."""
+        # calls to recommend a move using "AI"
+        if self.is_white_turn:        
+            dummy(self.legal_moves())
         # Clear all existing pieces from the board
         self.canvas.delete("piece")
         # Place pieces on the board
@@ -207,7 +217,7 @@ class ChessGUI:
         col = 7 - col # reverse the column mapping
         clicked_square = chess.square(col, row)
 
- # Clear existing move dots when clicking a new square
+        # Clear existing move dots when clicking a new square
         for dot in self.move_dots:
             self.canvas.delete(dot)
         self.move_dots = []
@@ -294,7 +304,6 @@ class ChessGUI:
 
     def check_game_over(self):
         """Check if the game is over (checkmate, stalemate, etc.)."""
-
         if self.board.is_checkmate():
             winner = "Black" if not self.is_white_turn else "White"
             messagebox.showinfo("Checkmate", f"{winner} wins!")

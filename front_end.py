@@ -253,7 +253,7 @@ class ChessGUI:
     def check_game_over(self):
         """Check if the game is over (checkmate, stalemate, etc.)."""
         if self.board.is_checkmate():
-            winner = "White" if not self.is_white_turn else "Black"
+            winner = "Black" if not self.is_white_turn else "White"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
             self.reset_board()
             return True

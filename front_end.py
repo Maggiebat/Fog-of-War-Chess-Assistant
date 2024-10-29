@@ -69,63 +69,10 @@ class ChessGUI:
     # Track dots for move indicators
         self.move_dots = []
 
-<<<<<<< HEAD
     def print_legal_moves(self):
         legal_moves = list(self.board.legal_moves)
         print(legal_moves)
         print(len(legal_moves))
-=======
-    # Draw dots on legal moves
-    def show_move_dots(self, moves):
-        self.clear_move_dots()  # Clear any existing dots
-        for move in moves:
-            row, col = 7 - chess.square_rank(move.to_square), chess.square_file(move.to_square)
-            x = col * self.square_size + self.square_size // 2
-            y = row * self.square_size + self.square_size // 2
-            dot = self.canvas.create_oval(x - 5, y - 5, x + 5, y + 5, fill="blue", tags="dot") #currently blue dots but can be changed
-            self.move_dots.append(dot)
-
-    # Clear all dots after move
-    def clear_move_dots(self):
-        for dot in self.move_dots:
-            self.canvas.delete(dot)
-        self.move_dots = []
-
-    def on_square_click(self, event):
-        col = event.x // self.square_size
-        row = event.y // self.square_size
-        clicked_square = chess.square(col, 7 - row)
-        
-        if self.selected_square is None:
-            # Select the piece if any
-            piece = self.board.piece_at(clicked_square)
-            if piece and piece.color == self.is_white_turn:  # Ensure the player selects their own piece
-                self.selected_square = clicked_square
-                
-                # Get legal moves for this piece
-                legal_moves = [move for move in self.board.legal_moves if move.from_square == self.selected_square]
-                self.show_move_dots(legal_moves)  # Show move dots
-        else:
-            # Try to make a move
-            move = chess.Move(self.selected_square, clicked_square)
-            if move in self.board.legal_moves:
-                self.board.push(move)
-                self.update_pieces()
-                self.update_database(self.selected_square, clicked_square)
-
-                # Check for game-ending conditions
-                if self.check_game_over():
-                    return
-
-                # Switch turns between players
-                self.is_white_turn = not self.is_white_turn
-            else:
-                messagebox.showerror("Illegal Move", "That move is not legal.")
-
-            # Reset selected square and clear move dots
-            self.selected_square = None
-            self.clear_move_dots()
->>>>>>> 84fbdd4805b962bcc3fa94f5c8bc8c29befe1117
 
     def quit_game(self):
         # Resets the SQL table

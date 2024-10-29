@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import chess
+import chess.pgn
 import mysql.connector
 import time
 
@@ -12,6 +13,8 @@ class ChessGUI:
         # Chess board size
         self.board_size = 8
         self.square_size = 64  # Size of each square in pixels
+
+        self.moves = ""
         
         # Initialize MySQL database connection
         self.connection = mysql.connector.connect(
@@ -53,6 +56,11 @@ class ChessGUI:
         # Makes it so you can hit Escape to leave the game
         self.root.bind("<Escape>", lambda event: self.quit_game())
 
+        # Create a button to print the moves made in the game
+        self.move_list = []
+        print_moves_button = tk.Button(self.root, text="Print Moves", command=self.print_moves)
+        print_moves_button.pack()
+
         # Track selected square and moves
         self.selected_square = None
 
@@ -62,6 +70,7 @@ class ChessGUI:
     def print_legal_moves(self):
         legal_moves = list(self.board.legal_moves)
         print(legal_moves)
+        print(len(legal_moves))
 
     def quit_game(self):
         # Resets the SQL table
@@ -176,7 +185,6 @@ class ChessGUI:
         """Place pieces on the board according to the current board state."""
         # Clear all existing pieces from the board
         self.canvas.delete("piece")
-
         # Place pieces on the board
         for row in range(8):
             for col in range(8):
@@ -196,8 +204,6 @@ class ChessGUI:
         row = 7-(event.y // self.square_size)
         col = 7 - col # reverse the column mapping
         clicked_square = chess.square(col, row)
-        # debug
-        print(f"Clicked at: x={event.x}, y={event.y}, col={col}, row={row}, clicked_square={clicked_square}")
 
         if self.selected_square is None:
             # Select the piece if any
@@ -211,9 +217,12 @@ class ChessGUI:
                 self.board.push(move)
                 self.update_pieces()
 
+                # Store the move in the move list
+                self.move_list.append(move.uci())
+
                 # Update the database
                 self.update_database(self.selected_square, clicked_square)
-
+                
                 # Check for game-ending conditions
                 if self.check_game_over():
                     return
@@ -259,20 +268,30 @@ class ChessGUI:
 
     def check_game_over(self):
         """Check if the game is over (checkmate, stalemate, etc.)."""
+
         if self.board.is_checkmate():
             winner = "White" if not self.is_white_turn else "Black"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
             self.reset_board()
+            print(self.moves)
             return True
         elif self.board.is_stalemate():
             messagebox.showinfo("Stalemate", "It's a draw!")
             self.reset_board()
+            print(self.moves)
             return True
         elif self.board.is_insufficient_material():
             messagebox.showinfo("Draw", "Insufficient material for checkmate!")
             self.reset_board()
+            print(self.moves)
             return True
         return False
+    
+    def print_moves(self):
+        """Print the moves made so far in the game."""
+        print("Moves made in the game: ")
+        for move in self.move_list:
+            print(move)
 
     def print_board_state(self):
         """Print the current board state (for debugging purposes)."""

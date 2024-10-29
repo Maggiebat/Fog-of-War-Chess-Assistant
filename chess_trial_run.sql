@@ -8,6 +8,7 @@ CREATE TABLE chessboard (
 	vis BOOLEAN
 );
 
+-- need to see what chess-python can do first
 CREATE TABLE captured (
 	-- where 0 = player 1 and 1 = player 2
     player BOOLEAN,

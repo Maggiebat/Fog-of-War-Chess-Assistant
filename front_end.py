@@ -193,8 +193,9 @@ class ChessGUI:
     def update_pieces(self):
         """Place pieces on the board according to the current board state."""
         # calls to recommend a move using "AI"
-        if self.is_white_turn :
-            dummy(self.legal_moves())
+        if self.is_white_turn:
+            legal_moves = list(self.board.legal.moves)
+            dummy(legal_moves)
         # Clear all existing pieces from the board
         self.canvas.delete("piece")
         # Place pieces on the board

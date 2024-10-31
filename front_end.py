@@ -4,7 +4,6 @@ import chess
 import chess.pgn
 import mysql.connector
 from dummy_function import dummy
-import time
 
 class ChessGUI:
     def __init__(self, root):
@@ -29,6 +28,9 @@ class ChessGUI:
         # Initialize python-chess board
         self.board = chess.Board()
 
+        self.turn_label = tk.Label(self.root, text="White's Turn", font=16)
+        self.turn_label.pack()
+
         # Create Canvas to draw chessboard
         self.canvas = tk.Canvas(self.root, width=self.board_size * self.square_size, 
                                 height=self.board_size * self.square_size)
@@ -48,11 +50,11 @@ class ChessGUI:
 
         # Creates a button that prints the board state **debug feature**
         print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
-        print_button.pack()
+        print_button.pack(side=tk.LEFT)
 
         # Creates a button that prints all legal board moves **can be used later on**
         print_legal_moves_button = tk.Button(self.root, text="Print Legal Moves", command=self.print_legal_moves)
-        print_legal_moves_button.pack()
+        print_legal_moves_button.pack(side=tk.LEFT)
 
         # Makes it so you can hit Escape to leave the game
         self.root.bind("<Escape>", lambda event: self.quit_game())
@@ -60,18 +62,13 @@ class ChessGUI:
         # Create a button to print the moves made in the game
         self.move_list = []
         print_moves_button = tk.Button(self.root, text="Print Move History", command=self.print_moves)
-        print_moves_button.pack()
+        print_moves_button.pack(side=tk.LEFT)
 
         # Track selected square and moves
         self.selected_square = None
 
         # Track whose turn it is (True for white, False for black)
         self.is_white_turn = True
-
-        # Button that suggests move
-        self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
-        self.suggest_move_button.pack()
-        self.update_suggest_button_state()
         
         # Track dots for move indicators
         self.move_dots = []
@@ -79,7 +76,17 @@ class ChessGUI:
         # Tracks captured peices
         self.captured_pieces = {"white": [], "black": []}
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
-        print_captured_button.pack()
+        print_captured_button.pack(side=tk.LEFT)
+
+        # Button that suggests move
+        self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
+        self.suggest_move_button.pack()
+        self.update_suggest_button_state(side=tk.LEFT)
+
+    
+    def update_turn_label(self):
+        current_turn = "White's Turn" if self.is_white_turn else "Black's Turn"
+        self.turn_label.config(text=current_turn)
     
     def print_captured_pieces(self):
         """Print the captured pieces for both players."""
@@ -264,9 +271,10 @@ class ChessGUI:
                 if self.check_game_over():
                     return
 
-                # Switch turns between players
+                # Switch turns between players and functionalites
                 self.is_white_turn = not self.is_white_turn
                 self.update_suggest_button_state()
+                self.update_turn_label()
             else:
                 messagebox.showerror("Illegal Move", "That move is not legal.")
 

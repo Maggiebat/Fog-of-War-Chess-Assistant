@@ -77,7 +77,7 @@ VALUES
 
 -- fow aspect so that if color of piece = 'W' then the visibility cannot be set to false (it will always be visible)
 ALTER TABLE chessboard
-ADD CONTRAINT chk_color_vis
+ADD CONSTRAINT chk_color_vis
 CHECK (NOT(color = 'W' AND vis = false));
 
 

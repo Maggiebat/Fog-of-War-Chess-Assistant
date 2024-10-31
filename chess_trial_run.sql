@@ -1,18 +1,11 @@
 USE fogofwarchessboard;
-
+-- This chessboard is for player 1's perspective not for the board as a whole
 CREATE TABLE chessboard (
 	col CHAR(1),
 	rw INT,
     color char(1),
     piece CHAR(1),
 	vis BOOLEAN
-);
-
--- need to see what chess-python can do first
-CREATE TABLE captured (
-	-- where 0 = player 1 and 1 = player 2
-    player BOOLEAN,
-    piece CHAR(1)
 );
 
 INSERT INTO chessboard(col,rw,color,piece,vis) 
@@ -82,7 +75,10 @@ VALUES
 ('G', 8, 'B', 'n', true),
 ('H', 8, 'B', 'r', true);
 
-SELECT * FROM chessboard;
+-- fow aspect so that if color of piece = 'W' then the visibility cannot be set to false (it will always be visible)
+ALTER TABLE chessboard
+ADD CONTRAINT chk_color_vis
+CHECK (NOT(color = 'W' AND vis = false));
 
 
 

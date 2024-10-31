@@ -76,6 +76,16 @@ class ChessGUI:
         # Track dots for move indicators
         self.move_dots = []
 
+        # Tracks captured peices
+        self.captured_pieces = {"white": [], "black": []}
+        print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
+        print_captured_button.pack()
+    
+    def print_captured_pieces(self):
+        """Print the captured pieces for both players."""
+        print(f"Captured White Pieces: {self.captured_pieces['white']}")
+        print(f"Captured Black Pieces: {self.captured_pieces['black']}")
+
     def update_suggest_button_state(self):
         if self.is_white_turn:
             self.suggest_move_button.config(state=tk.NORMAL)
@@ -236,6 +246,11 @@ class ChessGUI:
             # Try to make a move
             move = chess.Move(self.selected_square, clicked_square)
             if move in self.board.legal_moves:
+                captured_piece = self.board.piece_at(clicked_square)
+                if captured_piece:
+                    piece_color = 'white' if captured_piece.color else 'black'
+                    self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
+                
                 self.board.push(move)
                 self.update_pieces()
 

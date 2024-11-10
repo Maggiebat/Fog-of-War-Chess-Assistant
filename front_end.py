@@ -4,6 +4,7 @@ import chess
 import chess.pgn
 import mysql.connector
 from dummy_function import dummy
+from fow_engine import FoW_Engine1
 
 class ChessGUI:
     def __init__(self, root):
@@ -79,10 +80,20 @@ class ChessGUI:
         print_captured_button.pack(side=tk.LEFT)
 
         # Button that suggests move
-        self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
+        # self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
+        # self.suggest_move_button.pack(side=tk.LEFT)
+        # self.update_suggest_button_state()
+
+        self.suggest_move_button = tk.Button(self.root, text="Make Suggestion",command=self.start_engine)
         self.suggest_move_button.pack(side=tk.LEFT)
         self.update_suggest_button_state()
 
+    def start_engine(self):
+        # Create an instance of FoW_Engine1, passing the connection
+        engine = FoW_Engine1(self.connection)
+
+        # Run the engine
+        engine.run_engine()
     
     def update_turn_label(self):
         current_turn = "White's Turn" if self.is_white_turn else "Black's Turn"
@@ -98,6 +109,7 @@ class ChessGUI:
             self.suggest_move_button.config(state=tk.NORMAL)
         else:
             self.suggest_move_button.config(state=tk.DISABLED)
+
 
     # make this an accessible list throughout code
     def print_legal_moves(self, legal_moves):

@@ -52,8 +52,8 @@ class ChessGUI:
         print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
         print_button.pack(side=tk.LEFT)
 
-        # Creates a button that prints all legal board moves **can be used later on**
-        print_legal_moves_button = tk.Button(self.root, text="Print Legal Moves", command=self.print_legal_moves)
+        # Creates a button that prints all legal board moves **debug feautre** 
+        print_legal_moves_button = tk.Button(self.root, text="Print Legal Moves", command=lambda: self.print_legal_moves(list(self.board.legal_moves)))
         print_legal_moves_button.pack(side=tk.LEFT)
 
         # Makes it so you can hit Escape to leave the game
@@ -80,8 +80,8 @@ class ChessGUI:
 
         # Button that suggests move
         self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
-        self.suggest_move_button.pack()
-        self.update_suggest_button_state(side=tk.LEFT)
+        self.suggest_move_button.pack(side=tk.LEFT)
+        self.update_suggest_button_state()
 
     
     def update_turn_label(self):
@@ -99,8 +99,8 @@ class ChessGUI:
         else:
             self.suggest_move_button.config(state=tk.DISABLED)
 
-    def print_legal_moves(self):
-        legal_moves = list(self.board.legal_moves)
+    # make this an accessible list throughout code
+    def print_legal_moves(self, legal_moves):
         print(legal_moves)
         print(len(legal_moves))
 
@@ -113,6 +113,7 @@ class ChessGUI:
         self.root.quit()
         print("Game ended")
 
+    # resets the board at the end of the game/when game is exited 
     def reset_board(self):
         # Delete all existing rows in the chess table
         self.cursor.execute("TRUNCATE TABLE chessboard")
@@ -262,7 +263,8 @@ class ChessGUI:
                 self.update_pieces()
 
                 # Store the move in the move list
-                self.move_list.append(move.uci())
+                if self.is_white_turn:
+                    self.move_list.append(move.uci())
 
                 # Update the database
                 self.update_database(self.selected_square, clicked_square)

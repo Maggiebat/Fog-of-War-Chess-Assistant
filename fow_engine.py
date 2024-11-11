@@ -94,6 +94,8 @@ class FoW_Engine1:
         # Populate the board with visible pieces
         for col, rw, color, piece, vis in FoW_chessboard:
             square = chess.square(ord(col) - ord('A'), rw - 1)
+            if not color:
+                continue
             if color == 'W':
                 self.board.set_piece_at(square, chess.Piece.from_symbol(piece.upper()))
             else:

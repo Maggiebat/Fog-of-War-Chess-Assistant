@@ -26,6 +26,14 @@ class ChessGUI:
         )
         self.cursor = self.connection.cursor()
 
+        # creates the table chessboard
+        self.cursor.execute("DROP TABLE IF EXISTS chessboard")
+        self.cursor.execute("CREATE TABLE chessboard (col CHAR(1), rw INT, color char(1), piece CHAR(1), vis BOOLEAN)")
+        print("Table is created")
+        self.connection.commit()
+        self.refill_board()
+        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_vis CHECK (NOT(color = 'W' AND vis = false));")
+
         # Initialize python-chess board
         self.board = chess.Board()
 
@@ -88,7 +96,7 @@ class ChessGUI:
         self.suggest_move_button.pack(side=tk.LEFT)
         self.update_suggest_button_state()
 
-        # ran here once to set up original visibility
+        # ran here once to set up original visibility for player 1
         self.update_visibility(list(self.board.legal_moves))
 
     def start_engine(self):
@@ -120,17 +128,19 @@ class ChessGUI:
 
     def quit_game(self):
         # Resets the SQL table
-        self.reset_board()
+        self.cursor.execute("DROP TABLE chessboard")
+        print("Table has been dropped")
+        self.connection.commit()
         # Close the MySQL connection
         self.connection.close()
         # Close the GUI window
         self.root.quit()
         print("Game ended")
 
-    # resets the board at the end of the game/when game is exited 
-    def reset_board(self):
-        # Delete all existing rows in the chess table
-        self.cursor.execute("TRUNCATE TABLE chessboard")
+    # refills the board at the beginning of the game
+    def refill_board(self):
+        # # Delete all existing rows in the chess table
+        # self.cursor.execute("TRUNCATE TABLE chessboard")
 
         # Repopulate the table with the initial chessboard setup and set visible to TRUE
         initial_setup = [
@@ -205,7 +215,7 @@ class ChessGUI:
         self.cursor.executemany(query, initial_setup)
         self.connection.commit()
 
-        print("Board has been reset to initial state with all pieces visible.")
+        print("Board has been filled with initial chess setup.")
 
     # Loads the photos so that the GUI has chess pieces on the board
     def load_piece_images(self):
@@ -283,8 +293,8 @@ class ChessGUI:
 
                 # Update the database
                 self.update_database(self.selected_square, clicked_square)
-                # updates the visibility part of the database for white's perspective only
-                # I have it set to not because where it is located it will see the next player 1's move options which means 
+                # updates the visibility part of the database for player 1's perspective only
+                # I have it set to not because where it is located it will see the next player 1's move options therefore after the piece is moved
                 if not self.is_white_turn:
                     self.update_visibility(list(self.board.legal_moves))
                 
@@ -324,18 +334,23 @@ class ChessGUI:
         """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then vis=false."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
+        # makes the move list full of the to_square values (A1, B1, etc)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
         # debug print
         print("Legal Moves =", move_list)
         # iterates over each row in the table
         for row in results:
+            # makes the sqare value in the A1, B1 format
             square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
+            # pulls the color value
             color = row[2]
-            # sees if the square value is in the move list to_square, if not prints (to be eventaully the update)
+            # sees if the square value is in the move list
             if square in move_list:
                 print(square, "is a legal move")
                 self.cursor.execute("UPDATE chessboard SET vis = true WHERE col = %s AND rw = %s", (row[0], row[1]))
+            # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
             else:
+                # makes sure the check constraint is avoided
                 if color == 'W':
                     print(square, "is occupied by a white piece")
                 else:
@@ -379,17 +394,17 @@ class ChessGUI:
         if self.board.is_checkmate():
             winner = "Black" if not self.is_white_turn else "White"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
-            self.reset_board()
+            self.quit_game()
             print(self.moves)
             return True
         elif self.board.is_stalemate():
             messagebox.showinfo("Stalemate", "It's a draw!")
-            self.reset_board()
+            self.quit_game()
             print(self.moves)
             return True
         elif self.board.is_insufficient_material():
             messagebox.showinfo("Draw", "Insufficient material for checkmate!")
-            self.reset_board()
+            self.quit_game()
             print(self.moves)
             return True
         return False

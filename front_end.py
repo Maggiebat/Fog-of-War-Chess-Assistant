@@ -88,10 +88,12 @@ class ChessGUI:
         self.suggest_move_button.pack(side=tk.LEFT)
         self.update_suggest_button_state()
 
+        # ran here once to set up original visibility
+        self.update_visibility(list(self.board.legal_moves))
+
     def start_engine(self):
         # Create an instance of FoW_Engine1, passing the connection
         engine = FoW_Engine1(self.connection)
-
         # Run the engine
         engine.run_engine()
     
@@ -249,6 +251,7 @@ class ChessGUI:
         row = 7-(event.y // self.square_size)
         col = 7 - col # reverse the column mapping
         clicked_square = chess.square(col, row)
+        # placed here so that it is storing the current player's moves and not the next player
 
         # Clear existing move dots when clicking a new square
         for dot in self.move_dots:
@@ -280,6 +283,10 @@ class ChessGUI:
 
                 # Update the database
                 self.update_database(self.selected_square, clicked_square)
+                # updates the visibility part of the database for white's perspective only
+                # I have it set to not because where it is located it will see the next player 1's move options which means 
+                if not self.is_white_turn:
+                    self.update_visibility(list(self.board.legal_moves))
                 
                 # Check for game-ending conditions
                 if self.check_game_over():
@@ -312,6 +319,26 @@ class ChessGUI:
                 )
                 self.move_dots.append(dot)
 
+    # rough draft of the logic
+    def update_visibility(self, legal_moves):
+        """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then vis=false."""
+        self.cursor.execute("SELECT * FROM chessboard;")
+        results = self.cursor.fetchall()
+        move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
+        # debug print
+        print("Legal Moves =", move_list)
+        # iterates over each row in the table
+        for row in results:
+            square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
+            # sees if the square value is in the move list to_square, if not prints (to be eventaully the update)
+            if square in move_list:
+                print(square, "is a legal move")
+                self.cursor.execute("UPDATE chessboard SET vis = true WHERE col = %s AND rw = %s", (row[0], row[1]))
+            else:
+                print(square, "is not a legal move")
+                self.cursor.execute("UPDATE chessboard SET vis = false WHERE col = %s AND rw = %s", (row[0], row[1]))
+            
+                    
     def update_database(self, from_square, to_square):
         """Update the MySQL database after a move."""
         from_col = chr(chess.square_file(from_square) + ord('A'))

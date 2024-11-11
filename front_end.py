@@ -330,13 +330,17 @@ class ChessGUI:
         # iterates over each row in the table
         for row in results:
             square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
+            color = row[2]
             # sees if the square value is in the move list to_square, if not prints (to be eventaully the update)
             if square in move_list:
                 print(square, "is a legal move")
                 self.cursor.execute("UPDATE chessboard SET vis = true WHERE col = %s AND rw = %s", (row[0], row[1]))
             else:
-                print(square, "is not a legal move")
-                self.cursor.execute("UPDATE chessboard SET vis = false WHERE col = %s AND rw = %s", (row[0], row[1]))
+                if color == 'W':
+                    print(square, "is occupied by a white piece")
+                else:
+                    print(square, "is not a legal move")
+                    self.cursor.execute("UPDATE chessboard SET vis = false WHERE col = %s AND rw = %s", (row[0], row[1]))
             
                     
     def update_database(self, from_square, to_square):

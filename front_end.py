@@ -28,11 +28,12 @@ class ChessGUI:
 
         # creates the table chessboard
         self.cursor.execute("DROP TABLE IF EXISTS chessboard")
-        self.cursor.execute("CREATE TABLE chessboard (col CHAR(1), rw INT, color char(1), piece CHAR(1), vis BOOLEAN)")
+        self.cursor.execute("CREATE TABLE chessboard (col CHAR(1), rw INT, color char(1), piece CHAR(1), visW BOOLEAN, visB BOOLEAN)")
         print("Table is created")
         self.connection.commit()
         self.refill_board()
-        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_vis CHECK (NOT(color = 'W' AND vis = false));")
+        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_visW CHECK (NOT(color = 'W' AND visW = false));")
+        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_visB CHECK (NOT(color = 'B' AND visB = false));")
 
         # Initialize python-chess board
         self.board = chess.Board()
@@ -97,7 +98,12 @@ class ChessGUI:
         self.update_suggest_button_state()
 
         # ran here once to set up original visibility for player 1
-        self.update_visibility(list(self.board.legal_moves))
+        self.update_visibility_white(list(self.board.legal_moves))
+        # ran here once to set up original visibility for player 2
+        self.update_visibility_black(list(self.board.legal_moves))
+
+        # white starts first therefore we run this here
+        self.draw_fog_white()
 
     def start_engine(self):
         # Create an instance of FoW_Engine1, passing the connection
@@ -129,7 +135,10 @@ class ChessGUI:
     def quit_game(self):
         # Resets the SQL table
         self.cursor.execute("DROP TABLE chessboard")
-        print("Table has been dropped")
+        print("Table chessboard has been dropped")
+        self.connection.commit()
+        #self.cursor.execute("DROP TABLE FoW_chessboard")
+        #print("Table FoW_chessboard has been dropped")
         self.connection.commit()
         # Close the MySQL connection
         self.connection.close()
@@ -144,74 +153,74 @@ class ChessGUI:
 
         # Repopulate the table with the initial chessboard setup and set visible to TRUE
         initial_setup = [
-            ('A', 1, 'W', 'R', True),
-            ('B', 1, 'W', 'N', True),
-            ('C', 1, 'W', 'B', True),
-            ('D', 1, 'W', 'Q', True),
-            ('E', 1, 'W', 'K', True),
-            ('F', 1, 'W', 'B', True),
-            ('G', 1, 'W', 'N', True),
-            ('H', 1, 'W', 'R', True),
-            ('A', 2, 'W', 'P', True),
-            ('B', 2, 'W', 'P', True),
-            ('C', 2, 'W', 'P', True),
-            ('D', 2, 'W', 'P', True),
-            ('E', 2, 'W', 'P', True),
-            ('F', 2, 'W', 'P', True),
-            ('G', 2, 'W', 'P', True),
-            ('H', 2, 'W', 'P', True),
-            ('B', 3, '', '', True),
-            ('C', 3, '', '', True),
-            ('D', 3, '', '', True),
-            ('A', 3, '', '', True),
-            ('E', 3, '', '', True),
-            ('F', 3, '', '', True),
-            ('G', 3, '', '', True),
-            ('H', 3, '', '', True),
-            ('H', 3, '', '', True),
-            ('A', 4, '', '', True),
-            ('B', 4, '', '', True),
-            ('C', 4, '', '', True),
-            ('D', 4, '', '', True),
-            ('E', 4, '', '', True),
-            ('F', 4, '', '', True),
-            ('G', 4, '', '', True),
-            ('H', 4, '', '', True),
-            ('A', 5, '', '', True),
-            ('B', 5, '', '', True),
-            ('C', 5, '', '', True),
-            ('D', 5, '', '', True),
-            ('E', 5, '', '', True),
-            ('F', 5, '', '', True),
-            ('G', 5, '', '', True),
-            ('H', 5, '', '', True),
-            ('A', 6, '', '', True),
-            ('B', 6, '', '', True),
-            ('C', 6, '', '', True),
-            ('D', 6, '', '', True),
-            ('E', 6, '', '', True),
-            ('F', 6, '', '', True),
-            ('G', 6, '', '', True),
-            ('H', 6, '', '', True),
-            ('A', 7, 'B', 'p', True),
-            ('B', 7, 'B', 'p', True),
-            ('C', 7, 'B', 'p', True),
-            ('D', 7, 'B', 'p', True),
-            ('E', 7, 'B', 'p', True),
-            ('F', 7, 'B', 'p', True),
-            ('G', 7, 'B', 'p', True),
-            ('H', 7, 'B', 'p', True),
-            ('A', 8, 'B', 'r', True),
-            ('B', 8, 'B', 'n', True),
-            ('C', 8, 'B', 'b', True),
-            ('D', 8, 'B', 'q', True),
-            ('E', 8, 'B', 'k', True),
-            ('F', 8, 'B', 'b', True),
-            ('G', 8, 'B', 'n', True),
-            ('H', 8, 'B', 'r', True)
+            ('A', 1, 'W', 'R', True, True),
+            ('B', 1, 'W', 'N', True, True),
+            ('C', 1, 'W', 'B', True, True),
+            ('D', 1, 'W', 'Q', True, True),
+            ('E', 1, 'W', 'K', True, True),
+            ('F', 1, 'W', 'B', True, True),
+            ('G', 1, 'W', 'N', True, True),
+            ('H', 1, 'W', 'R', True, True),
+            ('A', 2, 'W', 'P', True, True),
+            ('B', 2, 'W', 'P', True, True),
+            ('C', 2, 'W', 'P', True, True),
+            ('D', 2, 'W', 'P', True, True),
+            ('E', 2, 'W', 'P', True, True),
+            ('F', 2, 'W', 'P', True, True),
+            ('G', 2, 'W', 'P', True, True),
+            ('H', 2, 'W', 'P', True, True),
+            ('A', 3, '', '', True, True),
+            ('B', 3, '', '', True, True),
+            ('C', 3, '', '', True, True),
+            ('D', 3, '', '', True, True),
+            ('E', 3, '', '', True, True),
+            ('F', 3, '', '', True, True),
+            ('G', 3, '', '', True, True),
+            ('H', 3, '', '', True, True),
+            ('A', 4, '', '', True, True),
+            ('B', 4, '', '', True, True),
+            ('C', 4, '', '', True, True),
+            ('D', 4, '', '', True, True),
+            ('E', 4, '', '', True, True),
+            ('F', 4, '', '', True, True),
+            ('G', 4, '', '', True, True),
+            ('H', 4, '', '', True, True),
+            ('A', 5, '', '', True, True),
+            ('B', 5, '', '', True, True),
+            ('C', 5, '', '', True, True),
+            ('D', 5, '', '', True, True),
+            ('E', 5, '', '', True, True),
+            ('F', 5, '', '', True, True),
+            ('G', 5, '', '', True, True),
+            ('H', 5, '', '', True, True),
+            ('A', 6, '', '', True, True),
+            ('B', 6, '', '', True, True),
+            ('C', 6, '', '', True, True),
+            ('D', 6, '', '', True, True),
+            ('E', 6, '', '', True, True),
+            ('F', 6, '', '', True, True),
+            ('G', 6, '', '', True, True),
+            ('H', 6, '', '', True, True),
+            ('A', 7, 'B', 'p', True, True),
+            ('B', 7, 'B', 'p', True, True),
+            ('C', 7, 'B', 'p', True, True),
+            ('D', 7, 'B', 'p', True, True),
+            ('E', 7, 'B', 'p', True, True),
+            ('F', 7, 'B', 'p', True, True),
+            ('G', 7, 'B', 'p', True, True),
+            ('H', 7, 'B', 'p', True, True),
+            ('A', 8, 'B', 'r', True, True),
+            ('B', 8, 'B', 'n', True, True),
+            ('C', 8, 'B', 'b', True, True),
+            ('D', 8, 'B', 'q', True, True),
+            ('E', 8, 'B', 'k', True, True),
+            ('F', 8, 'B', 'b', True, True),
+            ('G', 8, 'B', 'n', True, True),
+            ('H', 8, 'B', 'r', True, True)
         ]
 
-        query = "INSERT INTO chessboard (col, rw, color, piece, vis) VALUES (%s, %s, %s, %s, %s)"
+
+        query = "INSERT INTO chessboard (col, rw, color, piece, visW, visB) VALUES (%s, %s, %s, %s, %s, %s)"
         self.cursor.executemany(query, initial_setup)
         self.connection.commit()
 
@@ -225,6 +234,54 @@ class ChessGUI:
         for piece in pieces:
             piece_images[piece] = tk.PhotoImage(file=f"images/{piece}.png")
         return piece_images
+    
+    def draw_fog_white(self):
+        """Draws a fog overlay on squares that aren't visible to the white player."""
+        self.cursor.execute("SELECT * FROM chessboard;")
+        results = self.cursor.fetchall()
+
+        self.canvas.delete("fog")
+        
+        # Define the fog color
+        fog_color = "red"  # Consider using a color that subtly overlays the square
+
+        for row in results:
+            col, rw, _, _, visW, _ = row  # Extract the necessary fields
+            
+            # Check visibility for white player
+            if not visW:  # If visW is False, draw fog
+                # Calculate the pixel coordinates for the square
+                x1 = (ord(col) - ord('A')) * self.square_size
+                y1 = (8 - rw) * self.square_size  # 8x8 board with A1 at bottom-left
+                x2 = x1 + self.square_size
+                y2 = y1 + self.square_size
+                
+                # Draw a fog rectangle over the square
+                self.canvas.create_rectangle(x1, y1, x2, y2, fill=fog_color, tags="fog")
+
+    def draw_fog_black(self):
+        """Draws a fog overlay on squares that aren't visible to the white player."""
+        self.cursor.execute("SELECT * FROM chessboard;")
+        results = self.cursor.fetchall()
+
+        self.canvas.delete("fog")
+        
+        # Define the fog color
+        fog_color = "purple"  # Consider using a color that subtly overlays the square
+
+        for row in results:
+            col, rw, _, _, _, visB = row  # Extract the necessary fields
+            
+            # Check visibility for white player
+            if not visB:  # If visW is False, draw fog
+                # Calculate the pixel coordinates for the square
+                x1 = (ord(col) - ord('A')) * self.square_size
+                y1 = (8 - rw) * self.square_size  # 8x8 board with A1 at bottom-left
+                x2 = x1 + self.square_size
+                y2 = y1 + self.square_size
+                
+                # Draw a fog rectangle over the square
+                self.canvas.create_rectangle(x1, y1, x2, y2, fill=fog_color, tags="fog")
 
     def draw_board(self):
         """Draw the chessboard on the canvas."""
@@ -296,8 +353,13 @@ class ChessGUI:
                 # updates the visibility part of the database for player 1's perspective only
                 # I have it set to not because where it is located it will see the next player 1's move options therefore after the piece is moved
                 if not self.is_white_turn:
-                    self.update_visibility(list(self.board.legal_moves))
+                    print("updating player 1's perspective")
+                    self.update_visibility_white(list(self.board.legal_moves))
                 
+                if self.is_white_turn:
+                    print("updating player 2's perspective")
+                    self.update_visibility_black(list(self.board.legal_moves))
+
                 # Check for game-ending conditions
                 if self.check_game_over():
                     return
@@ -306,6 +368,10 @@ class ChessGUI:
                 self.is_white_turn = not self.is_white_turn
                 self.update_suggest_button_state()
                 self.update_turn_label()
+                if self.is_white_turn:
+                    self.draw_fog_white()
+                else: 
+                    self.draw_fog_black()
             else:
                 messagebox.showerror("Illegal Move", "That move is not legal.")
 
@@ -329,13 +395,13 @@ class ChessGUI:
                 )
                 self.move_dots.append(dot)
 
-    # rough draft of the logic
-    def update_visibility(self, legal_moves):
-        """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then vis=false."""
+    def update_visibility_white(self, legal_moves):
+        """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then visW=false."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
         # makes the move list full of the to_square values (A1, B1, etc)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
+        print(move_list)
         # iterates over each row in the table
         for row in results:
             # makes the sqare value in the A1, B1 format
@@ -344,15 +410,38 @@ class ChessGUI:
             color = row[2]
             # sees if the square value is in the move list
             if square in move_list:
-                self.cursor.execute("UPDATE chessboard SET vis = true WHERE col = %s AND rw = %s", (row[0], row[1]))
+                self.cursor.execute("UPDATE chessboard SET visW = true WHERE col = %s AND rw = %s", (row[0], row[1]))
             # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
             else:
                 # makes sure the check constraint is avoided
                 if color == 'W':
                     continue
                 else:
-                    self.cursor.execute("UPDATE chessboard SET vis = false WHERE col = %s AND rw = %s", (row[0], row[1]))
-            
+                    self.cursor.execute("UPDATE chessboard SET visW = false WHERE col = %s AND rw = %s", (row[0], row[1]))
+
+    def update_visibility_black(self, legal_moves):
+        """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then visB=false."""
+        self.cursor.execute("SELECT * FROM chessboard;")
+        results = self.cursor.fetchall()
+        # makes the move list full of the to_square values (A1, B1, etc)
+        move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
+        print(move_list)
+        # iterates over each row in the table
+        for row in results:
+            # makes the sqare value in the A1, B1 format
+            square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
+            # pulls the color value
+            color = row[2]
+            # sees if the square value is in the move list
+            if square in move_list:
+                self.cursor.execute("UPDATE chessboard SET visB = true WHERE col = %s AND rw = %s", (row[0], row[1]))
+            # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
+            else:
+                # makes sure the check constraint is avoided
+                if color == 'B':
+                    continue
+                else:
+                    self.cursor.execute("UPDATE chessboard SET visB = false WHERE col = %s AND rw = %s", (row[0], row[1]))
                     
     def update_database(self, from_square, to_square):
         """Update the MySQL database after a move."""

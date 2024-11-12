@@ -11,88 +11,79 @@ class FoW_Engine1:
     def __init__(self, connection):#ADD UR STUFF HERE
         self.connection = connection
         self.cursor = self.connection.cursor()
-        self.connection = mysql.connector.connect(host="localhost", user="root", password="maggie", database="fogofwar")
+        self.connection = mysql.connector.connect(host="localhost", user="root", password="Kade", database="fogofwar")
 
     def run_engine(self):
         """Main loop for the chess engine."""
-        #move = 0
+        turn = 0
         self.board = chess.Board()
-        print("Board initialized")
+        self.board.clear()
         # step 1: read in visible table from front end, if it's the first move populate the table with all starting positions, track moves we made or can see
+        # step 2: if it's after first move, calculate where opponent might have their pieces, ignore otherwise
+        # step 3: update the piece table with lesser probability for all positions of top k opponent moves,update "known" positions prob
+        # step 4: parse through all possible moves from the piece tracking table, testing depth only needs to be like 9 or so right now
+        # step 5: decide on the move that produces the optimal scoring for the player, then print/send this move back to GUI
+        # step 6: wait on some kind of signal from front end to reset this process, end game when front end tells us it's over
+
+
+
 
         self.initialize_visible_pieces()
         print("visible pieces initialized")
 
-        # step 1: read in visible table from front end, if it's the first move populate the table with all starting positions, track moves we made or can see
-        #self.update_pieces_table()
-        #print("pieces table updated")
-        # step 2: if it's after first move, calculate where opponent might have their pieces, ignore otherwise
-        #if move > 0:
         self.evaluate_moves()
         print("moves evaluated")
-        # step 3: update the piece table with lesser probability for all positions of top k opponent moves,update "known" positions prob
-        # step 4: parse through all possible moves from the piece tracking table, testing depth only needs to be like 9 or so right now
-        # step 5: decide on the move that produces the optimal scoring for the player, then print/send this move back to GUI
+
         self.suggest_player_move()
         print("move suggested")
-        # step 6: wait on some kind of signal from front end to reset this process, end game when front end tells us it's over
 
-             # notes: our table cannot access the data from the game on where the opponents are if they arent visible (duh)
-            # this engine will not make moves or send any information back to the front end, other than a reccomendation
-            # it would be cool to visually represent where the engine is predicting the opponents pieces somehow, so we can compare how it's performing with reality
+
+
+
+        # notes: our table cannot access the data from the game on where the opponents are if they aren't visible (duh)
+        # this engine will not make moves or send any information back to the front end, other than a recommendation
+        # it would be cool to visually represent where the engine is predicting the opponents pieces somehow, so we can compare how it's performing with reality
 
     def initialize_visible_pieces(self):
         """Initialize the visible pieces from the database."""
-        self.cursor.execute(
-            """CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), prob FLOAT);""")
-        # Clear existing visible pieces
+        initial_setup = [
+            ('A', 7, 'B', 'p', True, 1.0),
+            ('B', 7, 'B', 'p', True, 1.0),
+            ('C', 7, 'B', 'p', True, 1.0),
+            ('D', 7, 'B', 'p', True, 1.0),
+            ('E', 7, 'B', 'p', True, 1.0),
+            ('F', 7, 'B', 'p', True, 1.0),
+            ('G', 7, 'B', 'p', True, 1.0),
+            ('H', 7, 'B', 'p', True, 1.0),
+            ('A', 8, 'B', 'r', True, 1.0),
+            ('B', 8, 'B', 'n', True, 1.0),
+            ('C', 8, 'B', 'b', True, 1.0),
+            ('D', 8, 'B', 'q', True, 1.0),
+            ('E', 8, 'B', 'k', True, 1.0),
+            ('F', 8, 'B', 'b', True, 1.0),
+            ('G', 8, 'B', 'n', True, 1.0),
+            ('H', 8, 'B', 'r', True, 1.0)
+        ]
         self.cursor.execute("TRUNCATE TABLE FoW_chessboard;")
-
-        # Fetch visible pieces from the existing chessboard
-        self.cursor.execute("SELECT col, rw, color, piece FROM chessboard WHERE vis = TRUE;")
-        visible_pieces = self.cursor.fetchall()
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), vis BOOLEAN, prob FLOAT DEFAULT 1.0);""")
 
         # Repopulate the visible pieces table
-        self.cursor.execute("""
-            INSERT INTO FoW_chessboard (col, rw, color, piece, prob)
-            SELECT col, rw, color, piece, NULL FROM chessboard WHERE vis = TRUE;
-        """)
-        self.connection.commit()
+        self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, vis, prob) SELECT col, rw, color, piece, vis, 1.0 FROM chessboard WHERE vis = TRUE;""")
 
+        query = "INSERT INTO FoW_chessboard (col, rw, color, piece, vis, prob) VALUES (%s, %s, %s, %s, %s, %s)"
+        self.cursor.executemany(query, initial_setup)
 
-    def update_pieces_table(self):
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), prob FLOAT);""")
-
-        # Fetch visible pieces from the existing chessboard
-        self.cursor.execute("SELECT col, rw, color, piece FROM chessboard WHERE vis = TRUE;")
-        visible_pieces = self.cursor.fetchall()
-        print("c1")
-        # Prepare data for insert
-        for col, rw, color, piece in visible_pieces:
-            # Check if the piece already exists
-            self.cursor.execute("SELECT EXISTS(SELECT 1 FROM FoW_chessboard WHERE col = %s AND rw = %s);", (col, rw))
-            exists = self.cursor.fetchone()[0]
-            print("c2")
-            if exists:
-                # Update the existing piece
-                self.cursor.execute("""UPDATE FoW_chessboard SET color = %s, piece = %s, prob = %s WHERE col = %s AND rw = %s""", (color, piece, 1.0, col, rw))
-                print("c3")
-            else:
-                # Insert a new piece
-                self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, prob) VALUES (%s, %s, %s, %s, %s)""", (col, rw, color, piece, 1.0))
-                print("c4")
-        # Commit the changes
         self.connection.commit()
 
     def evaluate_moves(self):
         """Evaluate all possible moves for opponent pieces using minimax and update the visible_chessboard table."""
         # Fetch visible pieces
-        self.cursor.execute("SELECT col, rw, color, piece, vis FROM chessboard;")
+        self.cursor.execute("SELECT col, rw, color, piece, vis, prob FROM FoW_chessboard;")
         FoW_chessboard = self.cursor.fetchall()
 
 
         # Populate the board with visible pieces
-        for col, rw, color, piece, vis in FoW_chessboard:
+        for col, rw, color, piece, vis, prob in FoW_chessboard:
             square = chess.square(ord(col) - ord('A'), rw - 1)
             if not color:
                 continue
@@ -118,34 +109,38 @@ class FoW_Engine1:
             move_score_pairs = list(zip(top_scores, top_moves))
             move_score_pairs.sort(key=lambda x: x[0], reverse=True)
             top_3_moves = move_score_pairs[:3]
-            for score, move in top_3_moves:
-                print(f"Move: {move}, Score: {score}")
+            print(top_3_moves)
+        for score, move in top_3_moves:
+            print(f"Move: {move}, Score: {score}")
 
 
             # Update probabilities for the current positions and insert new moves THIS WILL ALSO NEED A WAY TO REMOVE OUR "GUESS"
             # PIECES FROM THE DATASHEET IN THE EVENT THAT WE ACTUALLY SEE WHERE IT WAS MOVED TO: DO WE NEED TO ALTER PIECE TYPES FURTHER (BISHOP1, BISHOP2)
             # IS THERE A WAY TO LOG POSSIBLE MOVES A TRACE THEM BACK TO ITS VISIBLE POSITION?
 
-        from_square = move.from_square
-        to_square = move.to_square
-        piece = self.board.piece_at(from_square)
-        # Check if the target square is visible
-        to_col = chr(chess.square_file(to_square) + ord('A'))
-        to_row = chess.square_rank(to_square) + 1
-        self.cursor.execute("SELECT vis FROM chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
-        is_visible = self.cursor.fetchone()
+            from_square = move.from_square
+            to_square = move.to_square
+            piece = self.board.piece_at(from_square)
+            # Check if the target square is visible
+            to_col = chr(chess.square_file(to_square) + ord('A'))
+            to_row = chess.square_rank(to_square) + 1
+            self.cursor.execute("SELECT vis FROM chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
+            is_visible = self.cursor.fetchone()
 
-        # If the move goes to a non-visible square, add it to the table
-        if not is_visible or not is_visible[0]:
-            self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, prob) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE prob = 0.5 """, (to_col, to_row, piece.color, piece.symbol().upper(), 0.5))
+            # If the move goes to a non-visible square, add it to the table
+            if not is_visible or not is_visible[0]:
+                self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, prob) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE prob = 0.5 """, (to_col, to_row, piece.color, piece.symbol().upper(), 0.5))
 
-            # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
-            from_col = chr(chess.square_file(from_square) + ord('A'))
-            from_row = chess.square_rank(from_square) + 1
-            self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = %s AND rw = %s """,(from_col, from_row))
-            # Commit changes
+                # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
+                from_col = chr(chess.square_file(from_square) + ord('A'))
+                from_row = chess.square_rank(from_square) + 1
+                self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = %s AND rw = %s """,(from_col, from_row))
+                self.board.set_piece_at(to_square, piece)
+
+        # Commit changes
         self.connection.commit()
         print("Moves evaluated and visible_chessboard updated with new probabilities.")
+        print(self.board)
 
     def TOP3minimax(self, depth, maximizing_player):
         #TOP3minimax algorithm to evaluate moves for the minimizing player, returns best three moves for black to play
@@ -164,7 +159,8 @@ class FoW_Engine1:
                 return self.evaluate_board()
 
             if maximizing_player:
-                print("max player move")
+                self.board.turn = chess.WHITE
+                #print("max player move")
                 max_eval = float('-inf')
 
                 print(move)
@@ -178,9 +174,10 @@ class FoW_Engine1:
                 else:
                     print(f"Warning: Expected a float evaluation, got {type(eval)}")
                     print(f"Maximizing Player - Depth {depth} max_eval: {max_eval}")
-                    return max_eval
+                return max_eval
             else:
-                    print("min player move")
+                    #print("min player move")
+                    self.board.turn = chess.BLACK
                     min_eval = float('inf')
 
                     print(move)
@@ -193,7 +190,7 @@ class FoW_Engine1:
                     if eval < min_eval:
                         min_eval = eval
 
-                    print(f"Min Player - Depth {depth} min_eval: {min_eval}")
+                    #print(f"Min Player - Depth {depth} min_eval: {min_eval}")
                     return min_eval
 
     def minimax(self, depth, maximizing_player):
@@ -203,6 +200,7 @@ class FoW_Engine1:
                 return self.evaluate_board()  # Evaluate the board state with updated scoring
 
             if maximizing_player:
+                self.board.turn = chess.WHITE
                 max_eval = float('-inf')
 
                 self.board.push(move)
@@ -211,6 +209,7 @@ class FoW_Engine1:
                 max_eval = max(max_eval, eval)
                 return max_eval
             else:
+                self.board.turn = chess.BLACK
                 min_eval = float('inf')
 
                 self.board.push(move)
@@ -224,6 +223,7 @@ class FoW_Engine1:
         """Suggest a move to the player based on the minimax algorithm."""
         best_move = None
         best_value = float('-inf')
+        self.board.turn = chess.WHITE
 
         for move in self.board.legal_moves:
             self.board.push(move)
@@ -258,13 +258,18 @@ class FoW_Engine1:
                 probability_result = self.cursor.fetchone()
                 probability_score = probability_result[0] if probability_result else 1.0  # Default to 1.0 if not found
 
+                if self.cursor.nextset():
+                    pass
+
                 # Combine scores HERE
                 score = (piece_value + position_score) * probability_score
 
                 if piece.color:  # White pieces
                     evaluation += score
+
                 else:  # Black pieces
                     evaluation -= score
+
 
         return evaluation
 

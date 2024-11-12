@@ -21,7 +21,7 @@ class ChessGUI:
         self.connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="maggie", 
+            password="Kade",
             database="fogofwar"
         )
         self.cursor = self.connection.cursor()

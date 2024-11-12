@@ -21,7 +21,7 @@ class ChessGUI:
         self.connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="Kade",
+            password="maggie",
             database="fogofwar"
         )
         self.cursor = self.connection.cursor()
@@ -336,8 +336,6 @@ class ChessGUI:
         results = self.cursor.fetchall()
         # makes the move list full of the to_square values (A1, B1, etc)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
-        # debug print
-        print("Legal Moves =", move_list)
         # iterates over each row in the table
         for row in results:
             # makes the sqare value in the A1, B1 format
@@ -346,15 +344,13 @@ class ChessGUI:
             color = row[2]
             # sees if the square value is in the move list
             if square in move_list:
-                print(square, "is a legal move")
                 self.cursor.execute("UPDATE chessboard SET vis = true WHERE col = %s AND rw = %s", (row[0], row[1]))
             # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
             else:
                 # makes sure the check constraint is avoided
                 if color == 'W':
-                    print(square, "is occupied by a white piece")
+                    continue
                 else:
-                    print(square, "is not a legal move")
                     self.cursor.execute("UPDATE chessboard SET vis = false WHERE col = %s AND rw = %s", (row[0], row[1]))
             
                     

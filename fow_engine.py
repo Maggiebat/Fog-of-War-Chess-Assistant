@@ -11,7 +11,7 @@ class FoW_Engine1:
     def __init__(self, connection):#ADD UR STUFF HERE
         self.connection = connection
         self.cursor = self.connection.cursor()
-        self.connection = mysql.connector.connect(host="localhost", user="root", password="Kade", database="fogofwar")
+        self.connection = mysql.connector.connect(host="localhost", user="root", password="maggie", database="fogofwar")
 
     def run_engine(self):
         """Main loop for the chess engine."""

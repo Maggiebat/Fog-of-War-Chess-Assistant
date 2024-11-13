@@ -21,7 +21,7 @@ class ChessGUI:
         self.connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="Kade",
+            password="maggie",
             database="fogofwar"
         )
         self.cursor = self.connection.cursor()
@@ -63,10 +63,6 @@ class ChessGUI:
         print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
         print_button.pack(side=tk.LEFT)
 
-        # Creates a button that prints all legal board moves **debug feautre** 
-        print_legal_moves_button = tk.Button(self.root, text="Print Legal Moves", command=lambda: self.print_legal_moves(list(self.board.legal_moves)))
-        print_legal_moves_button.pack(side=tk.LEFT)
-
         # Makes it so you can hit Escape to leave the game
         self.root.bind("<Escape>", lambda event: self.quit_game())
 
@@ -90,9 +86,8 @@ class ChessGUI:
         print_captured_button.pack(side=tk.LEFT)
 
         # Button that suggests move
-        # self.suggest_move_button = tk.Button(self.root, text="Make Suggestion", command=lambda: dummy(list(self.board.legal_moves)))
-        # self.suggest_move_button.pack(side=tk.LEFT)
-        # self.update_suggest_button_state()
+        self.dummy_button = tk.Button(self.root, text="Dummy Button?", command=lambda: dummy(list(self.board.legal_moves)))
+        self.dummy_button.pack(side=tk.LEFT)
 
         self.suggest_move_button = tk.Button(self.root, text="Make Suggestion",command=self.start_engine)
         self.suggest_move_button.pack(side=tk.LEFT)
@@ -354,11 +349,9 @@ class ChessGUI:
                 # updates the visibility part of the database for player 1's perspective only
                 # I have it set to not because where it is located it will see the next player 1's move options therefore after the piece is moved
                 if not self.is_white_turn:
-                    print("updating player 1's perspective")
                     self.update_visibility_white(list(self.board.legal_moves))
                 
                 if self.is_white_turn:
-                    print("updating player 2's perspective")
                     self.update_visibility_black(list(self.board.legal_moves))
 
                 # Check for game-ending conditions
@@ -426,7 +419,8 @@ class ChessGUI:
         results = self.cursor.fetchall()
         # makes the move list full of the to_square values (A1, B1, etc)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
-        print(move_list)
+        # debug print
+        # print(move_list)
         # iterates over each row in the table
         for row in results:
             # makes the sqare value in the A1, B1 format

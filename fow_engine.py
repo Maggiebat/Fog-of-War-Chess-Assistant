@@ -11,7 +11,7 @@ class FoW_Engine1:
     def __init__(self, connection):#ADD UR STUFF HERE
         self.connection = connection
         self.cursor = self.connection.cursor()
-        self.connection = mysql.connector.connect(host="localhost", user="root", password="maggie", database="fogofwar")
+        self.connection = mysql.connector.connect(host="localhost", user="root", password="Kade", database="fogofwar")
 
     def run_engine(self):
         """Main loop for the chess engine."""
@@ -64,13 +64,13 @@ class FoW_Engine1:
             ('G', 8, 'B', 'n', True, 1.0),
             ('H', 8, 'B', 'r', True, 1.0)
         ]
-        self.cursor.execute("TRUNCATE TABLE FoW_chessboard;")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), vis BOOLEAN, prob FLOAT DEFAULT 1.0);""")
+        #self.cursor.execute("TRUNCATE TABLE FoW_chessboard;")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), visW BOOLEAN, prob FLOAT DEFAULT 1.0);""")
 
         # Repopulate the visible pieces table
-        self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, vis, prob) SELECT col, rw, color, piece, vis, 1.0 FROM chessboard WHERE vis = TRUE;""")
+        self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE;""")
 
-        query = "INSERT INTO FoW_chessboard (col, rw, color, piece, vis, prob) VALUES (%s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (%s, %s, %s, %s, %s, %s)"
         self.cursor.executemany(query, initial_setup)
 
         self.connection.commit()
@@ -78,7 +78,7 @@ class FoW_Engine1:
     def evaluate_moves(self):
         """Evaluate all possible moves for opponent pieces using minimax and update the visible_chessboard table."""
         # Fetch visible pieces
-        self.cursor.execute("SELECT col, rw, color, piece, vis, prob FROM FoW_chessboard;")
+        self.cursor.execute("SELECT col, rw, color, piece, visW, prob FROM FoW_chessboard;")
         FoW_chessboard = self.cursor.fetchall()
 
 
@@ -124,7 +124,7 @@ class FoW_Engine1:
             # Check if the target square is visible
             to_col = chr(chess.square_file(to_square) + ord('A'))
             to_row = chess.square_rank(to_square) + 1
-            self.cursor.execute("SELECT vis FROM chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
+            self.cursor.execute("SELECT visW FROM FoW_chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
             is_visible = self.cursor.fetchone()
 
             # If the move goes to a non-visible square, add it to the table

@@ -21,13 +21,14 @@ class ChessGUI:
         self.connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="maggie",
+            password="Kade",
             database="fogofwar"
         )
         self.cursor = self.connection.cursor()
 
         # creates the table chessboard
         self.cursor.execute("DROP TABLE IF EXISTS chessboard")
+        self.cursor.execute("DROP TABLE IF EXISTS FoW_Chessboard")
         self.cursor.execute("CREATE TABLE chessboard (col CHAR(1), rw INT, color char(1), piece CHAR(1), visW BOOLEAN, visB BOOLEAN)")
         print("Table is created")
         self.connection.commit()

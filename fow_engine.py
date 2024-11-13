@@ -47,33 +47,89 @@ class FoW_Engine1:
     def initialize_visible_pieces(self):
         """Initialize the visible pieces from the database."""
         initial_setup = [
-            ('A', 7, 'B', 'p', True, 1.0),
-            ('B', 7, 'B', 'p', True, 1.0),
-            ('C', 7, 'B', 'p', True, 1.0),
-            ('D', 7, 'B', 'p', True, 1.0),
-            ('E', 7, 'B', 'p', True, 1.0),
-            ('F', 7, 'B', 'p', True, 1.0),
-            ('G', 7, 'B', 'p', True, 1.0),
-            ('H', 7, 'B', 'p', True, 1.0),
-            ('A', 8, 'B', 'r', True, 1.0),
-            ('B', 8, 'B', 'n', True, 1.0),
-            ('C', 8, 'B', 'b', True, 1.0),
-            ('D', 8, 'B', 'q', True, 1.0),
-            ('E', 8, 'B', 'k', True, 1.0),
-            ('F', 8, 'B', 'b', True, 1.0),
-            ('G', 8, 'B', 'n', True, 1.0),
-            ('H', 8, 'B', 'r', True, 1.0)
+            ('A', 1, '', '', False, 1.0),
+            ('B', 1, '', '', False, 1.0),
+            ('C', 1, '', '', False, 1.0),
+            ('D', 1, '', '', False, 1.0),
+            ('E', 1, '', '', False, 1.0),
+            ('F', 1, '', '', False, 1.0),
+            ('G', 1, '', '', False, 1.0),
+            ('H', 1, '', '', False, 1.0),
+            ('A', 2, '', '', False, 1.0),
+            ('B', 2, '', '', False, 1.0),
+            ('C', 2, '', '', False, 1.0),
+            ('D', 2, '', '', False, 1.0),
+            ('E', 2, '', '', False, 1.0),
+            ('F', 2, '', '', False, 1.0),
+            ('G', 2, '', '', False, 1.0),
+            ('H', 2, '', '', False, 1.0),
+            ('A', 3, '', '', False, 1.0),
+            ('B', 3, '', '', False, 1.0),
+            ('C', 3, '', '', False, 1.0),
+            ('D', 3, '', '', False, 1.0),
+            ('E', 3, '', '', False, 1.0),
+            ('F', 3, '', '', False, 1.0),
+            ('G', 3, '', '', False, 1.0),
+            ('H', 3, '', '', False, 1.0),
+            ('A', 4, '', '', False, 1.0),
+            ('B', 4, '', '', False, 1.0),
+            ('C', 4, '', '', False, 1.0),
+            ('D', 4, '', '', False, 1.0),
+            ('E', 4, '', '', False, 1.0),
+            ('F', 4, '', '', False, 1.0),
+            ('G', 4, '', '', False, 1.0),
+            ('H', 4, '', '', False, 1.0),
+            ('A', 5, '', '', False, 1.0),
+            ('B', 5, '', '', False, 1.0),
+            ('C', 5, '', '', False, 1.0),
+            ('D', 5, '', '', False, 1.0),
+            ('E', 5, '', '', False, 1.0),
+            ('F', 5, '', '', False, 1.0),
+            ('G', 5, '', '', False, 1.0),
+            ('H', 5, '', '', False, 1.0),
+            ('A', 6, '', '', False, 1.0),
+            ('B', 6, '', '', False, 1.0),
+            ('C', 6, '', '', False, 1.0),
+            ('D', 6, '', '', False, 1.0),
+            ('E', 6, '', '', False, 1.0),
+            ('F', 6, '', '', False, 1.0),
+            ('G', 6, '', '', False, 1.0),
+            ('H', 6, '', '', False, 1.0),
+            ('A', 7, 'B', 'p', False, 1.0),
+            ('B', 7, 'B', 'p', False, 1.0),
+            ('C', 7, 'B', 'p', False, 1.0),
+            ('D', 7, 'B', 'p', False, 1.0),
+            ('E', 7, 'B', 'p', False, 1.0),
+            ('F', 7, 'B', 'p', False, 1.0),
+            ('G', 7, 'B', 'p', False, 1.0),
+            ('H', 7, 'B', 'p', False, 1.0),
+            ('A', 8, 'B', 'r', False, 1.0),
+            ('B', 8, 'B', 'n', False, 1.0),
+            ('C', 8, 'B', 'b', False, 1.0),
+            ('D', 8, 'B', 'q', False, 1.0),
+            ('E', 8, 'B', 'k', False, 1.0),
+            ('F', 8, 'B', 'b', False, 1.0),
+            ('G', 8, 'B', 'n', False, 1.0),
+            ('H', 8, 'B', 'r', False, 1.0)
         ]
-        #self.cursor.execute("TRUNCATE TABLE FoW_chessboard;")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), visW BOOLEAN, prob FLOAT DEFAULT 1.0);""")
+        self.cursor.execute("""SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'FoW_chessboard';""")
+        table_exists = self.cursor.fetchone()[0] > 0
+        # if this is the first time calling the engine, create the table and fill with visible data and starting black positions FIX LATER WITH TURN TRACKING
+        if table_exists == 0:
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), visW BOOLEAN, prob FLOAT);""")
+            self.cursor.execute("""ALTER TABLE FoW_chessboard ADD UNIQUE(col, rw);""")
+            self.connection.commit()
+            query = "INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (%s, %s, %s, %s, %s, %s)"
+            self.cursor.executemany(query, initial_setup)
+            self.connection.commit()
+            # Repopulate the visible pieces table
+            self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE ON DUPLICATE KEY UPDATE color=VALUES(color), piece=VALUES(piece), visW=VALUES(visW), prob=VALUES(prob);""")
+            self.connection.commit()
+        else:
+            self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE ON DUPLICATE KEY UPDATE color=VALUES(color), piece=VALUES(piece), visW=VALUES(visW), prob=VALUES(prob);""")
+            self.connection.commit()
 
-        # Repopulate the visible pieces table
-        self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE;""")
 
-        query = "INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (%s, %s, %s, %s, %s, %s)"
-        self.cursor.executemany(query, initial_setup)
-
-        self.connection.commit()
 
     def evaluate_moves(self):
         """Evaluate all possible moves for opponent pieces using minimax and update the visible_chessboard table."""
@@ -85,12 +141,15 @@ class FoW_Engine1:
         # Populate the board with visible pieces
         for col, rw, color, piece, vis, prob in FoW_chessboard:
             square = chess.square(ord(col) - ord('A'), rw - 1)
-            if not color:
+            if piece == '':
                 continue
+
             if color == 'W':
                 self.board.set_piece_at(square, chess.Piece.from_symbol(piece.upper()))
-            else:
+            elif color == 'B' :
                 self.board.set_piece_at(square, chess.Piece.from_symbol(piece.lower()))
+            else:
+                continue
         print("board with visible pieces")
         print(self.board)
         top_scores = []
@@ -124,21 +183,21 @@ class FoW_Engine1:
             # Check if the target square is visible
             to_col = chr(chess.square_file(to_square) + ord('A'))
             to_row = chess.square_rank(to_square) + 1
+            print(to_col, to_row)
             self.cursor.execute("SELECT visW FROM FoW_chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
             is_visible = self.cursor.fetchone()
 
             # If the move goes to a non-visible square, add it to the table
             if not is_visible or not is_visible[0]:
-                self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, prob) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE prob = 0.5 """, (to_col, to_row, piece.color, piece.symbol().upper(), 0.5))
-
+                self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE prob = 0.5 """, (to_col, to_row, 'B', piece.symbol(), False))
+                self.connection.commit()
                 # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
                 from_col = chr(chess.square_file(from_square) + ord('A'))
                 from_row = chess.square_rank(from_square) + 1
                 self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = %s AND rw = %s """,(from_col, from_row))
+                self.connection.commit()
                 self.board.set_piece_at(to_square, piece)
 
-        # Commit changes
-        self.connection.commit()
         print("Moves evaluated and visible_chessboard updated with new probabilities.")
         print(self.board)
 

@@ -5,6 +5,7 @@ import chess.pgn
 import sqlite3
 # from dummy_function import dummy
 from fow_engine import FoW_Engine1
+from pawn_promote import promote
 
 class ChessGUI:
     def __init__(self, root):
@@ -364,12 +365,7 @@ class ChessGUI:
             # Try to make a move
             move = chess.Move(self.selected_square, clicked_square)
             if move in self.board.legal_moves:
-                captured_piece = self.board.piece_at(clicked_square)
-                if captured_piece:
-                    piece_color = 'W' if captured_piece.color else 'B'
-                    self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
-                    self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
-                
+                self.capture_piece(clicked_square)
                 self.board.push(move)
                 self.update_pieces()
 
@@ -404,6 +400,17 @@ class ChessGUI:
 
             # Reset selected square
             self.selected_square = None
+
+    def capture_piece(self, clicked_square):
+        captured_piece = self.board.piece_at(clicked_square)
+        if captured_piece:
+            # dictionary
+            piece_color = 'W' if captured_piece.color else 'B'
+            self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
+            # table version
+            self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
+        # if piece == P (ignore case) and row = 8: // this is just psudeocode needs to be replaced
+            promote(self.captured_pieces)
     
     def show_possible_moves(self, square):
         """Show dots on squares where the selected piece can move."""

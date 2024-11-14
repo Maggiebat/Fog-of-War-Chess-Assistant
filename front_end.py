@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import chess
 import chess.pgn
-import mysql.connector
-from dummy_function import dummy
+import sqlite3
+# from dummy_function import dummy
 from fow_engine import FoW_Engine1
 
 class ChessGUI:
@@ -18,23 +18,28 @@ class ChessGUI:
         self.moves = ""
         
         # Initialize MySQL database connection
-        self.connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="maggie",
-            database="fogofwar"
-        )
+        self.connection = sqlite3.connect("fogofwar.db")
         self.cursor = self.connection.cursor()
 
         # creates the table chessboard
         self.cursor.execute("DROP TABLE IF EXISTS chessboard")
         self.cursor.execute("DROP TABLE IF EXISTS FoW_Chessboard")
-        self.cursor.execute("CREATE TABLE chessboard (col CHAR(1), rw INT, color char(1), piece CHAR(1), visW BOOLEAN, visB BOOLEAN)")
+        self.cursor.execute("""
+        CREATE TABLE chessboard (
+            col CHAR(1),
+            rw INT,
+            color CHAR(1),
+            piece CHAR(1),
+            visW BOOLEAN,
+            visB BOOLEAN,
+            CHECK (NOT(color = 'W' AND visW = false)),
+            CHECK (NOT(color = 'B' AND visB = false))
+        )
+        """)
         print("Table is created")
         self.connection.commit()
+
         self.refill_board()
-        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_visW CHECK (NOT(color = 'W' AND visW = false));")
-        self.cursor.execute("ALTER TABLE chessboard ADD CONSTRAINT chk_color_visB CHECK (NOT(color = 'B' AND visB = false));")
 
         # Initialize python-chess board
         self.board = chess.Board()
@@ -86,8 +91,8 @@ class ChessGUI:
         print_captured_button.pack(side=tk.LEFT)
 
         # Button that suggests move
-        self.dummy_button = tk.Button(self.root, text="Dummy Button?", command=lambda: dummy(list(self.board.legal_moves)))
-        self.dummy_button.pack(side=tk.LEFT)
+        # self.dummy_button = tk.Button(self.root, text="Dummy Button?", command=lambda: dummy(list(self.board.legal_moves)))
+        # self.dummy_button.pack(side=tk.LEFT)
 
         self.suggest_move_button = tk.Button(self.root, text="Make Suggestion",command=self.start_engine)
         self.suggest_move_button.pack(side=tk.LEFT)
@@ -129,25 +134,27 @@ class ChessGUI:
         print(len(legal_moves))
 
     def quit_game(self):
-        # Resets the SQL table
-        self.cursor.execute("DROP TABLE chessboard")
+        # Resets the SQLite table
+        self.cursor.execute("DROP TABLE IF EXISTS chessboard")  # Safely drops the table if it exists
         print("Table chessboard has been dropped")
         self.connection.commit()
-        #self.cursor.execute("DROP TABLE FoW_chessboard")
-        #print("Table FoW_chessboard has been dropped")
-        self.connection.commit()
-        # Close the MySQL connection
+
+        # self.cursor.execute("DROP TABLE IF EXISTS FoW_chessboard")
+        # print("Table FoW_chessboard has been dropped")
+        # self.connection.commit()
+
+        # Close the SQLite connection
         self.connection.close()
+        print("SQLite connection closed")
+
         # Close the GUI window
         self.root.quit()
         print("Game ended")
 
+
     # refills the board at the beginning of the game
     def refill_board(self):
-        # # Delete all existing rows in the chess table
-        # self.cursor.execute("TRUNCATE TABLE chessboard")
-
-        # Repopulate the table with the initial chessboard setup and set visible to TRUE
+        # Repopulate the table with the initial chessboard setup and set visibility to TRUE
         initial_setup = [
             ('A', 1, 'W', 'R', True, True),
             ('B', 1, 'W', 'N', True, True),
@@ -215,12 +222,12 @@ class ChessGUI:
             ('H', 8, 'B', 'r', True, True)
         ]
 
-
-        query = "INSERT INTO chessboard (col, rw, color, piece, visW, visB) VALUES (%s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO chessboard (col, rw, color, piece, visW, visB) VALUES (?, ?, ?, ?, ?, ?)"
         self.cursor.executemany(query, initial_setup)
         self.connection.commit()
 
         print("Board has been filled with initial chess setup.")
+
 
     # Loads the photos so that the GUI has chess pieces on the board
     def load_piece_images(self):
@@ -236,13 +243,14 @@ class ChessGUI:
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
 
+        # Clear any previous fog overlay
         self.canvas.delete("fog")
         
-        # Define the fog color
-        fog_color = "red"  # Consider using a color that subtly overlays the square
+        # Define the fog color (you can use a semi-transparent color or adjust opacity)
+        fog_color = "red"  # Light red with transparency (note: Tkinter doesn't support RGBA natively, so use a solid color or check transparency options for your canvas)
 
         for row in results:
-            col, rw, _, _, visW, _ = row  # Extract the necessary fields
+            col, rw, _, piece, visW, _ = row  # Extract the necessary fields
             
             # Check visibility for white player
             if not visW:  # If visW is False, draw fog
@@ -251,33 +259,40 @@ class ChessGUI:
                 y1 = (8 - rw) * self.square_size  # 8x8 board with A1 at bottom-left
                 x2 = x1 + self.square_size
                 y2 = y1 + self.square_size
-                
+                            
                 # Draw a fog rectangle over the square
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=fog_color, tags="fog")
+        
+        print("Fog overlay has been drawn for white player.")
+
 
     def draw_fog_black(self):
-        """Draws a fog overlay on squares that aren't visible to the white player."""
+        """Draws a fog overlay on squares that aren't visible to the black player."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
 
+        # Clear any previous fog overlay
         self.canvas.delete("fog")
         
         # Define the fog color
-        fog_color = "purple"  # Consider using a color that subtly overlays the square
+        fog_color = "purple"  # You can adjust the color as needed
 
         for row in results:
             col, rw, _, _, _, visB = row  # Extract the necessary fields
             
-            # Check visibility for white player
-            if not visB:  # If visW is False, draw fog
+            # Check visibility for black player
+            if not visB:  # If visB is False, draw fog
                 # Calculate the pixel coordinates for the square
                 x1 = (ord(col) - ord('A')) * self.square_size
                 y1 = (8 - rw) * self.square_size  # 8x8 board with A1 at bottom-left
                 x2 = x1 + self.square_size
                 y2 = y1 + self.square_size
-                
+                            
                 # Draw a fog rectangle over the square
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=fog_color, tags="fog")
+        
+        print("Fog overlay has been drawn for black player.")
+
 
     def draw_board(self):
         """Draw the chessboard on the canvas."""
@@ -393,50 +408,58 @@ class ChessGUI:
         """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then visW=false."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
-        # makes the move list full of the to_square values (A1, B1, etc)
+        
+        # Create a list of legal moves in the form of squares (e.g., A1, B1, etc.)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
-        print(move_list)
-        # iterates over each row in the table
+        print(f"Legal moves for white: {move_list}")
+        
+        # Iterate over each row in the chessboard table
         for row in results:
-            # makes the sqare value in the A1, B1 format
-            square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
-            # pulls the color value
-            color = row[2]
-            # sees if the square value is in the move list
+            # Combine the column (col) and row (rw) to create the square identifier (e.g., A1, B1)
+            square = row[0] + str(row[1])  # row[0] = col, row[1] = rw
+            
+            # Check if the square is a legal move
             if square in move_list:
-                self.cursor.execute("UPDATE chessboard SET visW = true WHERE col = %s AND rw = %s", (row[0], row[1]))
-            # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
+                # Update visibility to true for legal moves
+                self.cursor.execute("UPDATE chessboard SET visW = true WHERE col = ? AND rw = ?", (row[0], row[1]))
             else:
-                # makes sure the check constraint is avoided
-                if color == 'W':
-                    continue
-                else:
-                    self.cursor.execute("UPDATE chessboard SET visW = false WHERE col = %s AND rw = %s", (row[0], row[1]))
+                # If the square is not in the move_list, it should not be visible to the white player
+                # Skip updating if the square is white and avoid violating constraints
+                if row[2] != 'W':  # Only update non-white pieces (color != 'W')
+                    self.cursor.execute("UPDATE chessboard SET visW = false WHERE col = ? AND rw = ?", (row[0], row[1]))
+
+        # Commit the updates after looping through all rows
+        self.connection.commit()  # Explicit commit for SQLite
+        print("Visibility for white player updated.")
 
     def update_visibility_black(self, legal_moves):
         """Update the visibility of the squares. Loop through the table, if the square (rw, col) is not in legal_moves then visB=false."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
-        # makes the move list full of the to_square values (A1, B1, etc)
+        
+        # Create a list of legal moves in the form of squares (e.g., A1, B1, etc.)
         move_list = [chess.square_name(move.to_square).upper() for move in legal_moves]
-        # debug print
-        # print(move_list)
-        # iterates over each row in the table
+        print(f"Legal moves for black: {move_list}")
+        
+        # Iterate over each row in the chessboard table
         for row in results:
-            # makes the sqare value in the A1, B1 format
-            square = row[0] + str(row[1]) # row[0] = col, row[1] = rw
-            # pulls the color value
-            color = row[2]
-            # sees if the square value is in the move list
+            # Combine the column (col) and row (rw) to create the square identifier (e.g., A1, B1)
+            square = row[0] + str(row[1])  # row[0] = col, row[1] = rw
+            
+            # Check if the square is a legal move
             if square in move_list:
-                self.cursor.execute("UPDATE chessboard SET visB = true WHERE col = %s AND rw = %s", (row[0], row[1]))
-            # if the square is not in the move_list then it is not a legal move which means it should not be seen to player 1
+                # Update visibility to true for legal moves
+                self.cursor.execute("UPDATE chessboard SET visB = true WHERE col = ? AND rw = ?", (row[0], row[1]))
             else:
-                # makes sure the check constraint is avoided
-                if color == 'B':
-                    continue
-                else:
-                    self.cursor.execute("UPDATE chessboard SET visB = false WHERE col = %s AND rw = %s", (row[0], row[1]))
+                # If the square is not in the move_list, it should not be visible to the black player
+                # Skip updating if the square is black and avoid violating constraints
+                if row[2] != 'B':  # Only update non-black pieces (color != 'B')
+                    self.cursor.execute("UPDATE chessboard SET visB = false WHERE col = ? AND rw = ?", (row[0], row[1]))
+
+        # Commit the updates after looping through all rows
+        self.connection.commit()  # Explicit commit for SQLite
+        print("Visibility for black player updated.")
+
                     
     def update_database(self, from_square, to_square):
         """Update the MySQL database after a move."""
@@ -450,24 +473,25 @@ class ChessGUI:
 
         # Clear the 'from' position in the database
         self.cursor.execute(
-            "UPDATE chessboard SET color = '', piece = '' WHERE col = %s AND rw = %s",
+            "UPDATE chessboard SET color = '', piece = '' WHERE col = ? AND rw = ?",
             (from_col, from_row)
         )
-        
+
         if self.is_white_turn:
-        # Set the 'to' position in the database
+            # Set the 'to' position in the database for white's turn
             self.cursor.execute(
-                "UPDATE chessboard SET color = 'W', piece = %s WHERE col = %s AND rw = %s",
+                "UPDATE chessboard SET color = 'W', piece = ? WHERE col = ? AND rw = ?",
                 (piece, to_col, to_row)
             )
         else:
+            # Set the 'to' position in the database for black's turn
             self.cursor.execute(
-                "UPDATE chessboard SET color = 'B', piece = %s WHERE col = %s AND rw = %s",
+                "UPDATE chessboard SET color = 'B', piece = ? WHERE col = ? AND rw = ?",
                 (piece, to_col, to_row)
             )
 
         # Commit the changes
-        self.connection.commit()
+        self.connection.commit()  # Commit the changes to the SQLite database
 
     def check_game_over(self):
         """Check if the game is over (checkmate, stalemate, etc.)."""
@@ -499,8 +523,11 @@ class ChessGUI:
         """Print the current board state (for debugging purposes)."""
         self.cursor.execute("SELECT * FROM chessboard;")
         results = self.cursor.fetchall()
+
+        # Print each row to the console
         for row in results:
-            print(row)  # Print each row to the console
+            print(row)  # Prints each row from the database
+
 
 if __name__ == "__main__":
     root = tk.Tk()

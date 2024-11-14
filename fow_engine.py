@@ -1,5 +1,5 @@
 import chess
-import mysql.connector
+import sqlite3
 ####CURRENTLY AM TESTING THIS USING THE BUTTON IN THE GUI#######
 ################################################################
 # FIX/REPLACE SCORING AND EVALUATION FUNCTIONS, FIGURE OUT HOW TO
@@ -9,9 +9,8 @@ import mysql.connector
 
 class FoW_Engine1:
     def __init__(self, connection):#ADD UR STUFF HERE
-        self.connection = connection
+        self.connection = sqlite3.connect("fogofwar.db")
         self.cursor = self.connection.cursor()
-        self.connection = mysql.connector.connect(host="localhost", user="root", password="maggie", database="fogofwar")
 
     def run_engine(self):
         """Main loop for the chess engine."""
@@ -112,22 +111,57 @@ class FoW_Engine1:
             ('G', 8, 'B', 'n', False, 1.0),
             ('H', 8, 'B', 'r', False, 1.0)
         ]
-        self.cursor.execute("""SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'FoW_chessboard';""")
+
+        # Check if the table exists
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM sqlite_master
+            WHERE type = 'table' AND name = 'FoW_chessboard';
+        """)
+
         table_exists = self.cursor.fetchone()[0] > 0
-        # if this is the first time calling the engine, create the table and fill with visible data and starting black positions FIX LATER WITH TURN TRACKING
-        if table_exists == 0:
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS FoW_chessboard (col CHAR(1),rw INT,color CHAR(1),piece CHAR(1), visW BOOLEAN, prob FLOAT);""")
-            self.cursor.execute("""ALTER TABLE FoW_chessboard ADD UNIQUE(col, rw);""")
+
+        # If the table doesn't exist, create it and insert the initial setup
+        if not table_exists:
+            # Create table with unique constraint during creation
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS FoW_chessboard (
+                    col CHAR(1),
+                    rw INTEGER,
+                    color CHAR(1),
+                    piece CHAR(1),
+                    visW INTEGER,  -- BOOLEAN substitute; use 0 and 1 for False and True
+                    prob FLOAT,
+                    UNIQUE(col, rw)  -- Unique constraint added here
+                );
+            """)
             self.connection.commit()
-            query = "INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (%s, %s, %s, %s, %s, %s)"
+
+            # Insert the initial setup data into the table
+            query = "INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (?, ?, ?, ?, ?, ?)"
             self.cursor.executemany(query, initial_setup)
             self.connection.commit()
-            # Repopulate the visible pieces table
-            self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE ON DUPLICATE KEY UPDATE color=VALUES(color), piece=VALUES(piece), visW=VALUES(visW), prob=VALUES(prob);""")
+
+            # Additional logic to repopulate visible pieces (if needed)
+            # This part depends on how you want to initialize the board's pieces or update them during the game.
+            self.cursor.execute("""
+                INSERT OR REPLACE INTO FoW_chessboard (col, rw, color, piece, visW, prob)
+                SELECT col, rw, color, piece, visW, 1.0
+                FROM chessboard
+                WHERE visW = 1;
+            """)
             self.connection.commit()
+
         else:
-            self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW, prob) SELECT col, rw, color, piece, visW, 1.0 FROM chessboard WHERE visW = TRUE ON DUPLICATE KEY UPDATE color=VALUES(color), piece=VALUES(piece), visW=VALUES(visW), prob=VALUES(prob);""")
+            # If the table exists, just update the visible pieces
+            self.cursor.execute("""
+                INSERT OR REPLACE INTO FoW_chessboard (col, rw, color, piece, visW, prob)
+                SELECT col, rw, color, piece, visW, 1.0
+                FROM chessboard
+                WHERE visW = 1;
+            """)
             self.connection.commit()
+
 
 
 
@@ -184,18 +218,32 @@ class FoW_Engine1:
             to_col = chr(chess.square_file(to_square) + ord('A'))
             to_row = chess.square_rank(to_square) + 1
             print(to_col, to_row)
-            self.cursor.execute("SELECT visW FROM FoW_chessboard WHERE col = %s AND rw = %s;", (to_col, to_row))
+            self.cursor.execute("SELECT visW FROM FoW_chessboard WHERE col = ? AND rw = ?;", (to_col, to_row))
             is_visible = self.cursor.fetchone()
 
             # If the move goes to a non-visible square, add it to the table
             if not is_visible or not is_visible[0]:
-                self.cursor.execute("""INSERT INTO FoW_chessboard (col, rw, color, piece, visW) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE prob = 0.5 """, (to_col, to_row, 'B', piece.symbol(), False))
+                self.cursor.execute("""
+                    INSERT OR IGNORE INTO FoW_chessboard (col, rw, color, piece, visW, prob)
+                    VALUES (?, ?, ?, ?, ?, 0.5)
+                """, (to_col, to_row, 'B', piece.symbol(), 0))
+
+                self.cursor.execute("""
+                    UPDATE FoW_chessboard
+                    SET prob = 0.5
+                    WHERE col = ? AND rw = ?
+                """, (to_col, to_row))
                 self.connection.commit()
                 # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
                 from_col = chr(chess.square_file(from_square) + ord('A'))
                 from_row = chess.square_rank(from_square) + 1
-                self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = %s AND rw = %s """,(from_col, from_row))
+                self.cursor.execute("""
+                    UPDATE FoW_chessboard
+                    SET prob = 0.5
+                    WHERE col = ? AND rw = ?
+                """, (from_col, from_row))
                 self.connection.commit()
+
                 self.board.set_piece_at(to_square, piece)
 
         print("Moves evaluated and visible_chessboard updated with new probabilities.")
@@ -313,12 +361,13 @@ class FoW_Engine1:
                 # Retrieve probability score from the database
                 col = chr(chess.square_file(square) + ord('A'))
                 rw = chess.square_rank(square) + 1
-                self.cursor.execute("SELECT prob FROM FoW_chessboard WHERE col = %s AND rw = %s;", (col, rw))
+                self.cursor.execute("SELECT prob FROM FoW_chessboard WHERE col = ? AND rw = ?;", (col, rw))
                 probability_result = self.cursor.fetchone()
                 probability_score = probability_result[0] if probability_result else 1.0  # Default to 1.0 if not found
 
-                if self.cursor.nextset():
-                    pass
+                # sqlite doesn't support this so idk what this can do
+                # if self.cursor.nextset():
+                #     pass
 
                 # Combine scores HERE
                 score = (piece_value + position_score) * probability_score

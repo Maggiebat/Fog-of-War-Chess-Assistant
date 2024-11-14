@@ -39,6 +39,14 @@ class ChessGUI:
         print("Table is created")
         self.connection.commit()
 
+        self.cursor.execute("DROP TABLE IF EXISTS captured")
+        self.cursor.execute("""
+        CREATE TABLE captured (
+            color CHAR(1),
+            piece CHAR(1)
+        )
+        """)
+
         self.refill_board()
 
         # Initialize python-chess board
@@ -86,7 +94,7 @@ class ChessGUI:
         self.move_dots = []
 
         # Tracks captured peices
-        self.captured_pieces = {"white": [], "black": []}
+        self.captured_pieces = {"W": [], "B": []}
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
         print_captured_button.pack(side=tk.LEFT)
 
@@ -118,8 +126,14 @@ class ChessGUI:
     
     def print_captured_pieces(self):
         """Print the captured pieces for both players."""
-        print(f"Captured White Pieces: {self.captured_pieces['white']}")
-        print(f"Captured Black Pieces: {self.captured_pieces['black']}")
+        # print(f"Captured White Pieces: {self.captured_pieces['W']}")
+        # print(f"Captured Black Pieces: {self.captured_pieces['B']}")
+        self.cursor.execute("SELECT * FROM captured;")
+        results = self.cursor.fetchall()
+        # Print each row to the console
+        for row in results:
+            print(row)  # Prints each row from the database
+        
 
     def update_suggest_button_state(self):
         if self.is_white_turn:
@@ -136,6 +150,9 @@ class ChessGUI:
     def quit_game(self):
         # Resets the SQLite table
         self.cursor.execute("DROP TABLE IF EXISTS chessboard")  # Safely drops the table if it exists
+        print("Table chessboard has been dropped")
+        self.connection.commit()
+        self.cursor.execute("DROP TABLE IF EXISTS captured")  # Safely drops the table if it exists
         print("Table chessboard has been dropped")
         self.connection.commit()
 
@@ -349,8 +366,9 @@ class ChessGUI:
             if move in self.board.legal_moves:
                 captured_piece = self.board.piece_at(clicked_square)
                 if captured_piece:
-                    piece_color = 'white' if captured_piece.color else 'black'
+                    piece_color = 'W' if captured_piece.color else 'B'
                     self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
+                    self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
                 
                 self.board.push(move)
                 self.update_pieces()

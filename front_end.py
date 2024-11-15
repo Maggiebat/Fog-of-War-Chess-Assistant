@@ -127,8 +127,8 @@ class ChessGUI:
     
     def print_captured_pieces(self):
         """Print the captured pieces for both players."""
-        # print(f"Captured White Pieces: {self.captured_pieces['W']}")
-        # print(f"Captured Black Pieces: {self.captured_pieces['B']}")
+        print(f"Captured White Pieces: {self.captured_pieces['W']}")
+        print(f"Captured Black Pieces: {self.captured_pieces['B']}")
         self.cursor.execute("SELECT * FROM captured;")
         results = self.cursor.fetchall()
         # Print each row to the console

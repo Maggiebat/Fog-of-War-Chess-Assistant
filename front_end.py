@@ -358,8 +358,6 @@ class ChessGUI:
             # Select the piece if any
             piece = self.board.piece_at(clicked_square)
             if piece and piece.color == self.is_white_turn:  # Ensure the player selects their own piece
-                if (self.board.piece_at(clicked_square) == 'P' or self.board.piece_at(clicked_square) == 'p') and (self.selected_square >= 56 or self.selected_square <= 7):
-                    promote(self.captured_pieces, self.is_white_turn)
                 self.selected_square = clicked_square
                 # Display possible moves for the selected piece
                 self.show_possible_moves(clicked_square)
@@ -405,13 +403,15 @@ class ChessGUI:
 
     def capture_piece(self, clicked_square, selected_square):
         captured_piece = self.board.piece_at(clicked_square)
-        if captured_piece:
+        print("I made it here! I am going to capture", captured_piece)
+        if captured_piece: # if captured_piece is not None
+            print("I actually captured", captured_piece, "here!")
             # dictionary
             piece_color = 'W' if captured_piece.color else 'B'
-            self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
+            self.captured_pieces[piece_color].append(captured_piece.symbol())
             # table version
             self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
-        if (self.board.piece_at(clicked_square) == 'P' or self.board.piece_at(clicked_square) == 'p') and (self.selected_square >= 56 or self.selected_square <= 7):
+        if (self.board.piece_at(selected_square) == 'P' or self.board.piece_at(selected_square) == 'p') and (clicked_square >= 56 or clicked_square <= 7):
             promote(self.captured_pieces, self.is_white_turn)
     
     def show_possible_moves(self, square):

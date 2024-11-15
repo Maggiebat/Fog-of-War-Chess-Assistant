@@ -358,7 +358,7 @@ class ChessGUI:
             # Select the piece if any
             piece = self.board.piece_at(clicked_square)
             if piece and piece.color == self.is_white_turn:  # Ensure the player selects their own piece
-                if (self.board.piece_at(self.selected_square) == 'P' or self.board.piece_at(self.selected_square) == 'p') and (clicked_square >= 56 or clicked_square <= 7):
+                if (self.board.piece_at(clicked_square) == 'P' or self.board.piece_at(clicked_square) == 'p') and (self.selected_square >= 56 or self.selected_square <= 7):
                     promote(self.captured_pieces)
                 self.selected_square = clicked_square
                 # Display possible moves for the selected piece
@@ -411,7 +411,7 @@ class ChessGUI:
             self.captured_pieces[piece_color].append(captured_piece.symbol().upper())
             # table version
             self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
-        if (self.board.piece_at(selected_square) == 'P' or self.board.piece_at(selected_square) == 'p') and (clicked_square >= 56 or clicked_square <= 7):
+        if (self.board.piece_at(clicked_square) == 'P' or self.board.piece_at(clicked_square) == 'p') and (self.selected_square >= 56 or self.selected_square <= 7):
             promote(self.captured_pieces)
     
     def show_possible_moves(self, square):

@@ -3,7 +3,6 @@ from tkinter import messagebox
 import chess
 import chess.pgn
 import sqlite3
-# from dummy_function import dummy
 from fow_engine import FoW_Engine1
 from pawn_promote import promote
 
@@ -99,10 +98,6 @@ class ChessGUI:
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
         print_captured_button.pack(side=tk.LEFT)
 
-        # Button that suggests move
-        # self.dummy_button = tk.Button(self.root, text="Dummy Button?", command=lambda: dummy(list(self.board.legal_moves)))
-        # self.dummy_button.pack(side=tk.LEFT)
-
         self.suggest_move_button = tk.Button(self.root, text="Make Suggestion",command=self.start_engine)
         self.suggest_move_button.pack(side=tk.LEFT)
         self.update_suggest_button_state()
@@ -156,10 +151,6 @@ class ChessGUI:
         self.cursor.execute("DROP TABLE IF EXISTS captured")  # Safely drops the table if it exists
         print("Table chessboard has been dropped")
         self.connection.commit()
-
-        # self.cursor.execute("DROP TABLE IF EXISTS FoW_chessboard")
-        # print("Table FoW_chessboard has been dropped")
-        # self.connection.commit()
 
         # Close the SQLite connection
         self.connection.close()
@@ -546,6 +537,7 @@ class ChessGUI:
         for move in self.move_list:
             print(move)
 
+    # debug function
     def print_board_state(self):
         """Print the current board state (for debugging purposes)."""
         self.cursor.execute("SELECT * FROM chessboard;")
@@ -554,7 +546,6 @@ class ChessGUI:
         # Print each row to the console
         for row in results:
             print(row)  # Prints each row from the database
-
 
 if __name__ == "__main__":
     root = tk.Tk()

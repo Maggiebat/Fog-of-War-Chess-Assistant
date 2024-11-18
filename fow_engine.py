@@ -160,11 +160,8 @@ class FoW_Engine1:
                 FROM chessboard
                 WHERE visW = 1;
             """)
+            self.cursor.execute("""DELETE FROM FoW_chessboard WHERE rw = 7 AND piece = 'p' AND col IN ( SELECT col FROM FoW_chessboard WHERE rw < 7 AND piece = 'p' );""")
             self.connection.commit()
-
-
-
-
     def evaluate_moves(self):
         """Evaluate all possible moves for opponent pieces using minimax and update the visible_chessboard table."""
         # Fetch visible pieces
@@ -176,7 +173,7 @@ class FoW_Engine1:
         for col, rw, color, piece, vis, prob in FoW_chessboard:
             square = chess.square(ord(col) - ord('A'), rw - 1)
             if piece == '':
-                continue
+                self.board.remove_piece_at(square)
 
             if color == 'W':
                 self.board.set_piece_at(square, chess.Piece.from_symbol(piece.upper()))
@@ -186,25 +183,26 @@ class FoW_Engine1:
                 continue
         print("board with visible pieces")
         print(self.board)
-        top_scores = []
-        top_moves = []
+        move_evaluations = []
         # Evaluate moves for opponent pieces
         self.board.turn = chess.BLACK
+
+
+
+        alpha = float('-inf')
+        beta = float('inf')
         for move in self.board.legal_moves:
-            print(move)
-
-
-            #Evaluate moves using top3minimax
-            print("Checking minimaxTOP3")
-            score = float(self.TOP3minimax(3, False))
-            top_scores.append(score)
-            top_moves.append(move)
-            move_score_pairs = list(zip(top_scores, top_moves))
-            move_score_pairs.sort(key=lambda x: x[0], reverse=True)
-            top_3_moves = move_score_pairs[:3]
+            self.board.push(move)
+            score, first_move = self.TOP3minimax(1, alpha, beta, False, move)
+            self.board.pop()
+            move_evaluations.append((score, first_move))
+            move_evaluations.sort(key=lambda x: x[0])
+            print(move_evaluations)
+            top_3_moves = move_evaluations[:3]
             print(top_3_moves)
+
         for score, move in top_3_moves:
-            print(f"Move: {move}, Score: {score}")
+            print(f"Move: {score}, Score: {move}")
 
 
             # Update probabilities for the current positions and insert new moves THIS WILL ALSO NEED A WAY TO REMOVE OUR "GUESS"
@@ -223,25 +221,14 @@ class FoW_Engine1:
 
             # If the move goes to a non-visible square, add it to the table
             if not is_visible or not is_visible[0]:
-                self.cursor.execute("""
-                    INSERT OR IGNORE INTO FoW_chessboard (col, rw, color, piece, visW, prob)
-                    VALUES (?, ?, ?, ?, ?, 0.5)
-                """, (to_col, to_row, 'B', piece.symbol(), 0))
+                self.cursor.execute("""INSERT OR IGNORE INTO FoW_chessboard (col, rw, color, piece, visW, prob) VALUES (?, ?, ?, ?, ?, 0.5) """, (to_col, to_row, 'B', piece.symbol(), 0))
 
-                self.cursor.execute("""
-                    UPDATE FoW_chessboard
-                    SET prob = 0.5
-                    WHERE col = ? AND rw = ?
-                """, (to_col, to_row))
+                self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = ? AND rw = ? """, (to_col, to_row))
                 self.connection.commit()
                 # Update current position probability to 0.5: THIS SHOULD BE A VARIABLE PROBABILITY IN THE FUTURE
                 from_col = chr(chess.square_file(from_square) + ord('A'))
                 from_row = chess.square_rank(from_square) + 1
-                self.cursor.execute("""
-                    UPDATE FoW_chessboard
-                    SET prob = 0.5
-                    WHERE col = ? AND rw = ?
-                """, (from_col, from_row))
+                self.cursor.execute("""UPDATE FoW_chessboard SET prob = 0.5 WHERE col = ? AND rw = ? """, (from_col, from_row))
                 self.connection.commit()
 
                 self.board.set_piece_at(to_square, piece)
@@ -249,56 +236,52 @@ class FoW_Engine1:
         print("Moves evaluated and visible_chessboard updated with new probabilities.")
         print(self.board)
 
-    def TOP3minimax(self, depth, maximizing_player):
-        #TOP3minimax algorithm to evaluate moves for the minimizing player, returns best three moves for black to play
-        ####THIS IS VERY MESSED UP RN
-        top_score = float('inf')
-        for move in self.board.legal_moves:
-            if depth == 0:
-                evaluation = self.evaluate_board()
-                print(f"Depth {depth} evaluation: {evaluation}")
-                min_eval = self.evaluate_board()
-                return min_eval
 
+    def TOP3minimax(self, depth, alpha, beta, maximizing_player, first_move=None):
+        if depth == 0 or not self.board.legal_moves:
+            evaluation = self.evaluate_board()
+            print(f"EVALUATION for {first_move}: {evaluation}")
+            return evaluation, first_move
 
-            if not self.board.legal_moves:
-                print(f"No legal moves, evaluating as draw at depth {depth}")
-                return self.evaluate_board()
+        if maximizing_player:
+            self.board.turn = chess.WHITE
+        else:
+            self.board.turn = chess.BLACK
 
-            if maximizing_player:
-                self.board.turn = chess.WHITE
-                #print("max player move")
-                max_eval = float('-inf')
+        moves = sorted(self.board.legal_moves, key=lambda move: self.heuristic_sort(self.board, move),
+                       reverse=maximizing_player)
 
-                print(move)
-                print(depth)
+        best_move = None
+        if maximizing_player:
+            max_eval = float('-inf')
+            for move in moves[:3]:
                 self.board.push(move)
-                depth = depth-1
-                eval = self.TOP3minimax(depth, False)
+                print("MAX MOVE", move)
+                eval, _ = self.TOP3minimax(depth - 1, alpha, beta, False, first_move or move)
                 self.board.pop()
-                if isinstance(eval, float):
-                    max_eval = max(max_eval, eval)
-                else:
-                    print(f"Warning: Expected a float evaluation, got {type(eval)}")
-                    print(f"Maximizing Player - Depth {depth} max_eval: {max_eval}")
-                return max_eval
-            else:
-                    #print("min player move")
-                    self.board.turn = chess.BLACK
-                    min_eval = float('inf')
-
-                    print(move)
-                    print(depth)
-                    self.board.push(move)
-                    depth = depth - 1
-                    eval = self.TOP3minimax(depth, True)
-                    self.board.pop()
-                    min_eval = min(min_eval, eval)
-                    if eval < min_eval:
-                        min_eval = eval
-
-                    #print(f"Min Player - Depth {depth} min_eval: {min_eval}")
-                    return min_eval
+                if eval > max_eval:
+                    max_eval = eval
+                    best_move = first_move or move  # Track the first move
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    print("beta prune")
+                    break  # Beta cutoff
+            return max_eval, best_move
+        else:
+            min_eval = float('inf')
+            for move in moves[:3]:
+                self.board.push(move)
+                print("MIN MOVE", move)
+                eval, _ = self.TOP3minimax(depth - 1, alpha, beta, True, first_move or move)
+                self.board.pop()
+                if eval < min_eval:
+                    min_eval = eval
+                    best_move = first_move or move  # Track the first move
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    print("alpha prune")
+                    break  # Alpha cutoff
+            return min_eval, best_move
 
     def minimax(self, depth, maximizing_player):
         """Minimax algorithm to evaluate moves with scoring."""
@@ -349,14 +332,17 @@ class FoW_Engine1:
             print(move_suggestion)
 
 
-    def evaluate_board(self):
+    def heuristic_sort(self, board, move):
         """Evaluate the current board state based on piece value, position, and probability."""
         evaluation: float = 0.00
+        self.board.push(move)
         for square in chess.SQUARES:
-            piece = self.board.piece_at(square)
+            piece = board.piece_at(square)
             if piece:
                 piece_value = self.get_piece_value(piece)
                 position_score = self.get_position_score(square, piece.color)
+                if piece.symbol().lower() == 'k':  # Penalize king moves in early/midgame
+                        position_score -= 200
 
                 # Retrieve probability score from the database
                 col = chr(chess.square_file(square) + ord('A'))
@@ -364,20 +350,31 @@ class FoW_Engine1:
                 self.cursor.execute("SELECT prob FROM FoW_chessboard WHERE col = ? AND rw = ?;", (col, rw))
                 probability_result = self.cursor.fetchone()
                 probability_score = probability_result[0] if probability_result else 1.0  # Default to 1.0 if not found
+                score = (piece_value + position_score) * probability_score
+                if self.board.is_capture(move):
+                    score * 2
+                evaluation += score
 
-                # sqlite doesn't support this so idk what this can do
-                # if self.cursor.nextset():
-                #     pass
+        self.board.pop()
+        return evaluation
+    def evaluate_board(self):
+        """Evaluate the current board state based on piece value, position, and probability."""
+        evaluation: float = 0.00
 
-                # Combine scores HERE
+        for square in chess.SQUARES:
+            piece = self.board.piece_at(square)
+            if piece:
+                piece_value = self.get_piece_value(piece)
+                position_score = self.get_position_score(square, piece.color)
+                # Retrieve probability score from the database
+                col = chr(chess.square_file(square) + ord('A'))
+                rw = chess.square_rank(square) + 1
+                self.cursor.execute("SELECT prob FROM FoW_chessboard WHERE col = ? AND rw = ?;", (col, rw))
+                probability_result = self.cursor.fetchone()
+                probability_score = probability_result[0] if probability_result else 1.0  # Default to 1.0 if not found
                 score = (piece_value + position_score) * probability_score
 
-                if piece.color:  # White pieces
-                    evaluation += score
-
-                else:  # Black pieces
-                    evaluation -= score
-
+                evaluation += score
 
         return evaluation
 
@@ -386,54 +383,99 @@ class FoW_Engine1:
         """Return the value of a piece."""
         value = 0
         if piece == "P":
-            value = 1
+            value = 10
         if piece == "N":
-            value = 3
+            value = 30
         if piece == "B":
-            value = 3
+            value = 30
         if piece == "R":
-            value = 5
+            value = 50
         if piece == "Q":
-            value = 9
+            value = 90
         if piece == "K":
-            value = 1000
+            value = 0
         if piece == "p":
-            value = -1
+            value = -10
         if piece == "n":
-            value = -3
+            value = -30
         if piece == "b":
-            value = -3
+            value = -30
         if piece == "r":
-            value = -5
+            value = -50
         if piece == "q":
-            value = -9
+            value = -90
         if piece == "k":
-            value = -1000
+            value = 0
 
         return value
 
-
     def get_position_score(self, square, is_white):
         """Return a score based on the piece's position on the board."""
-        # Example position values for pawns (can be customized)
-        position_values = {
-            # Each piece's position value can be customized here
-            'P': [0, 0, 5, 10, 15, 20, 25, 30],  # Pawn
-            'N': [0, 5, 10, 15, 15, 10, 5, 0],  # Knight
-            'B': [0, 5, 10, 15, 15, 10, 5, 0],  # Bishop
-            'R': [0, 5, 10, 15, 20, 25, 30, 0],  # Rook
-            'Q': [0, 0, 0, 0, 10, 20, 30, 40],  # Queen
-            'K': [0, 0, 0, 0, 0, 10, 20, 30],  # King
-        }
-
+        file = chess.square_file(square)
+        rank = chess.square_rank(square)
         piece = self.board.piece_at(square)
         piece_type = piece.symbol().upper()
+        index = (7 - rank) * 8 + file
+        position_values = {
+            'P': ( 0,  0,  0,  0,  0,  0,  0,  0,
+                   5, 10, 10, -5, -5, 10, 10,  5,
+                   1,  5,  5, 10, 10,  5,  5,  1,
+                   0,  0, 10, 20, 20, 10,  0,  0,
+                   1,  1,  10, 25, 25,  10,  1,  1,
+                   5,  5,  5,  5,  5,  5,  5,  5,
+                  10, 10, 10, 10, 10, 10, 10, 10,
+                   0,  0,  0,  0,  0,  0,  0,  0),
+            'N': (-50, -40, -30, -30, -30, -30, -40, -50,
+                  -40, -20,   0,   5,   5,   0, -20, -40,
+                  -30,   5,  10,  15,  15,  10,   5, -30,
+                  -30,  10,  15,  20,  20,  15,  10, -30,
+                  -30,   5,  15,  20,  20,  15,   5, -30,
+                  -30,  10,  10,  15,  15,  10,  10, -30,
+                  -40, -20,   0,   5,   5,   0, -20, -40,
+                  -50, -30, -30, -30, -30, -30, -30, -50),
+            'B':    (-20, -10, -10, -10, -10, -10, -10, -20,
+                      -10,   5,   0,   0,   0,   0,   5, -10,
+                      -10,  10,  10,  10,  10,  10,  10, -10,
+                      -10,   0,  10,  20,  20,  10,   0, -10,
+                      -10,   5,  15,  20,  20,  15,   5, -10,
+                      -10,  10,  10,  20,  20,  10,  10, -10,
+                      -10,   5,   0,  10,  10,   0,   5, -10,
+                      -20, -10, -10, -10, -10, -10, -10, -20),
+            'R': ( 0,  0,  5, 10, 10,  5,  0,  0,
+                   0,  0,  5, 10, 10,  5,  0,  0,
+                   0,  0,  5, 10, 10,  5,  0,  0,
+                   0,  0,  5, 10, 10,  5,  0,  0,
+                   5, 10, 10, 10, 10, 10, 10,  5,
+                  10, 15, 15, 15, 15, 15, 15, 10,
+                  15, 20, 20, 20, 20, 20, 20, 15,
+                   0,  0,  5, 10, 10,  5,  0,  0),
+            'Q': (-20, -10, -10, -10, -10, -10, -10, -20,
+                  -10,   0,   0,   5,   5,   0,   0, -10,
+                  -10,   0,   5,   5,   5,   5,   0, -10,
+                  -10,   0,   5,  10,  10,   5,   0, -10,
+                  -10,   0,   5,  10,  10,   5,   0, -10,
+                  -10,   5,   5,   5,   5,   5,   5, -10,
+                  -10,   0,   5,   0,   0,   0,   0, -10,
+                  -20, -10, -10, -10, -10, -10, -10, -20),
+            'K': (-30, -40, -40, -50, -50, -40, -40, -30,
+                  -30, -40, -40, -50, -50, -40, -40, -30,
+                  -30, -40, -40, -50, -50, -40, -40, -30,
+                  -30, -40, -40, -50, -50, -40, -40, -30,
+                  -20, -30, -30, -40, -40, -30, -30, -20,
+                  -10, -20, -20, -20, -20, -20, -20, -10,
+                   20,  20,   -10,   -10,   -10,  -10,  20,  20,
+                   20,  30,  10,   0,   0,  10,  30,  20),
+                    }
+        if not is_white:
+            index = 63 - index
+        position_values_piece = position_values.get(piece_type)
+        ppv = position_values_piece[index]
 
         if is_white:
-            return position_values.get(piece_type, [0] * 8)[chess.square_rank(square)]
+            return ppv
         else:
-            # For black pieces, invert the position scoring
-            return position_values.get(piece_type, [0] * 8)[7 - chess.square_rank(square)]
+            return -ppv
 
 
         pass
+

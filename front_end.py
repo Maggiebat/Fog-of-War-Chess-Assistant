@@ -315,6 +315,27 @@ class ChessGUI:
                 y2 = y1 + self.square_size
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
 
+    # Add column labels (A-H) at the top and bottom
+        for col in range(self.board_size):
+            letter = chr(65 + col)
+    
+    # Top labels
+            x_top = col * self.square_size + self.square_size // 1.2
+            y_top = self.square_size // 4  # Place near the top edge
+            self.canvas.create_text(x_top, y_top, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="s")
+    
+    # Bottom labels
+            x_bottom = col * self.square_size + self.square_size // 1.09
+            y_bottom = self.board_size * self.square_size - self.square_size // 4  # Place near the bottom edge
+            self.canvas.create_text(x_bottom, y_bottom, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="n")
+    
+    # Add row labels (1-8)
+        for row in range(self.board_size):
+            number = str(self.board_size - row)  # Reverse order for chessboard
+            x = self.square_size // 4  # Adjust to position inside the board area
+            y = row * self.square_size + self.square_size // 5
+            self.canvas.create_text(x, y, text=number, font=("Comic Sans MS", 7), fill="black", anchor="e")
+
     def update_pieces(self):
         """Place pieces on the board according to the current board state."""
         # Clear all existing pieces from the board

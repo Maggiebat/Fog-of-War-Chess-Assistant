@@ -162,6 +162,7 @@ class FoW_Engine1:
             """)
             self.cursor.execute("""DELETE FROM FoW_chessboard WHERE rw = 7 AND piece = 'p' AND col IN ( SELECT col FROM FoW_chessboard WHERE rw < 7 AND piece = 'p' );""")
             self.connection.commit()
+    
     def evaluate_moves(self):
         """Evaluate all possible moves for opponent pieces using minimax and update the visible_chessboard table."""
         # Fetch visible pieces
@@ -329,7 +330,11 @@ class FoW_Engine1:
             rw = chess.square_rank(best_move.from_square) + 1
             piece = self.board.piece_at(best_move.from_square).symbol()
             move_suggestion = f"Suggested Move: Move {piece} from {col}{rw} to {chr(chess.square_file(best_move.to_square) + ord('A'))}{chess.square_rank(best_move.to_square) + 1}."
-            print(move_suggestion)
+            processor = OutputProcessor()
+            chat_response = OutputProcessor.main(processor, move_suggestion)
+            print(chat_response)
+        else:
+            print("I have no suggestions at the moment.")
 
 
     def heuristic_sort(self, board, move):

@@ -1,5 +1,6 @@
 import chess
 import sqlite3
+from output_processor import OutputProcessor
 ####CURRENTLY AM TESTING THIS USING THE BUTTON IN THE GUI#######
 ################################################################
 # FIX/REPLACE SCORING AND EVALUATION FUNCTIONS, FIGURE OUT HOW TO

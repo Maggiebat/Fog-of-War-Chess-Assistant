@@ -1,5 +1,7 @@
 import google.generativeai as genai
 import json
+import tkinter as tk
+from tkinter import messagebox
 
 class OutputProcessor:
     def __init__(self):
@@ -28,7 +30,7 @@ class OutputProcessor:
     # takes engine move suggestion output, returns Assistant chat message to relay to user:
     def main(self, move_suggestion):
         output = self.get_gemini_output(move_suggestion)
-
+        messagebox.showinfo("Move Suggesstion", output)
         return output
 
 

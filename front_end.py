@@ -5,6 +5,8 @@ import chess.pgn
 import sqlite3
 from fow_engine import FoW_Engine1
 from pawn_promote import promote
+from tkinter import simpledialog
+from input_processor import InputProcessor
 
 class ChessGUI:
     def __init__(self, root):
@@ -98,6 +100,8 @@ class ChessGUI:
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
         print_captured_button.pack(side=tk.LEFT)
 
+        processor = InputProcessor()  # Create an instance of InputProcessor
+        self.biases = processor.bias()
         self.suggest_move_button = tk.Button(self.root, text="Make Suggestion",command=self.start_engine)
         self.suggest_move_button.pack(side=tk.LEFT)
         self.update_suggest_button_state()
@@ -110,11 +114,12 @@ class ChessGUI:
         # white starts first therefore we run this here
         self.draw_fog_white()
 
-    def start_engine(self):
+
+    def start_engine(self): # to add back in input add back in "biases" as a parameter
         # Create an instance of FoW_Engine1, passing the connection
         engine = FoW_Engine1(self.connection)
         # Run the engine
-        engine.run_engine()
+        engine.run_engine(self.biases) # to add back in input add back in "biases" as a parameter
     
     def update_turn_label(self):
         current_turn = "White's Turn" if self.is_white_turn else "Black's Turn"

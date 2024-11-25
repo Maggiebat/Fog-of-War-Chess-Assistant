@@ -13,7 +13,7 @@ class FoW_Engine1:
         self.connection = sqlite3.connect("fogofwar.db")
         self.cursor = self.connection.cursor()
 
-    def run_engine(self):
+    def run_engine(self, biases_dictionary): # To add back in input functionality add "biases_dictionary" as a parameter
         """Main loop for the chess engine."""
         turn = 0
         self.board = chess.Board()

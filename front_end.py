@@ -115,11 +115,11 @@ class ChessGUI:
         self.draw_fog_white()
 
 
-    def start_engine(self): # to add back in input add back in "biases" as a parameter
+    def start_engine(self): 
         # Create an instance of FoW_Engine1, passing the connection
         engine = FoW_Engine1(self.connection)
         # Run the engine
-        engine.run_engine(self.biases) # to add back in input add back in "biases" as a parameter
+        engine.run_engine(self.biases) 
     
     def update_turn_label(self):
         current_turn = "White's Turn" if self.is_white_turn else "Black's Turn"

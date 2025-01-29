@@ -1,21 +1,21 @@
 import google.generativeai as genai
 import json
-import tkinter as tk
-from tkinter import simpledialog
+import re
 
 class InputProcessor:
     def __init__(self):
-        # api key:
-        genai.configure(api_key="AIzaSyDh37esnX-KiysJhqx9P1OeWGUw67xjNh8")
-    
-    def bias(self):
-        root = tk.Tk()
-        root.withdraw()
-        input_value = simpledialog.askstring("Input", "Enter a value:")
-        if input_value is not None:
-            print("User input:", input_value)
-        user_input = self.main(input_value)
-        return user_input
+        # load API key from config file:
+        try:
+            with open("config.json", "r") as f:
+                config = json.load(f)
+                api_key = config.get("api_key")
+                if not api_key:
+                    raise ValueError("API key is missing from config.json")
+        except FileNotFoundError:
+            raise FileNotFoundError("config.json not found. Please create it with your API key.")
+
+        # configure Gemini:
+        genai.configure(api_key=api_key)
 
     # sends user input to Gemini API & retrieves its output:
     def get_gemini_output(self, user_input):
@@ -33,7 +33,7 @@ class InputProcessor:
                                           "neutralize, etc). "
                 "4. 'preference': whether the opponent has a preference for or over utilizes 'piece' (true or false). "
                 "5. 'force forks': whether the opponent will try to force forks with 'piece' (true or false). "
-                "Here is the input: " + user_input) # include user input in model prompt
+                "Here is the input: " + user_input)
 
         # return response as string:
         return response.text
@@ -41,26 +41,34 @@ class InputProcessor:
 
     # turns gemini output into python dictionary:
     def parse_structured_data(self, input_string):
+        """
+        Extracts only the JSON portion from the API response and parses it safely.
+        """
 
-        # extract the JSON part of the string:
-        start_index = input_string.find("```json") + len("```json")
-        end_index = input_string.rfind("```")
-        json_string = input_string[start_index:end_index].strip()
+        try:
+            # Use regex to find the JSON object in the response
+            match = re.search(r"\{.*\}", input_string, re.DOTALL)
+            if match:
+                json_string = match.group(0)  # Extract JSON part
+                data_dict = json.loads(json_string)  # Parse JSON
 
-        # parse the JSON into a dictionary:
-        data_dict = json.loads(json_string)
+                # Convert values to the desired format:
+                formatted_dict = {
+                    "severity": int(data_dict.get("severity", 0)),
+                    "piece": str(data_dict.get("piece", "")),
+                    "action": str(data_dict.get("action", "")),
+                    "preference": bool(data_dict.get("preference", False)),
+                    "force forks": bool(data_dict.get("force forks", False)),
+                }
 
-        # convert the values to the desired format:
-        formatted_dict = {
-            "severity": int(data_dict["severity"]),
-            "piece": str(data_dict["piece"]),
-            "action": str(data_dict["action"]),
-            "preference": bool(data_dict["preference"]),
-            "force forks": bool(data_dict["force forks"])
-        }
+                return formatted_dict
+            else:
+                print("Error: Could not extract valid JSON from response.")
+                return None
 
-        # return python dictionary:
-        return formatted_dict
+        except json.JSONDecodeError as e:
+            print(f"JSON Decode Error: {e}")
+            return None
 
 
     # takes user input, returns dictionary structure of important information:
@@ -74,12 +82,10 @@ class InputProcessor:
 if __name__ == "__main__":
 
     # example user input:
-    # user_input = "To win I must punish my opponent for over utilizing queen"
+    user_input = "To win I must punish my opponent for over utilizing queen"
 
     # instantiate class:
     processor = InputProcessor()
-
-    user_input = processor.bias()
 
     # process input:
     result = processor.main(user_input)

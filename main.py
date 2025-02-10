@@ -382,16 +382,32 @@ class ChessGUI:
             # Try to make a move
             move = chess.Move(self.selected_square, clicked_square)
             if move in self.board.legal_moves:
-                self.capture_piece(clicked_square, self.selected_square)
-                self.board.push(move)
-                self.update_pieces()
+                
+                # end of og onto new way to stop castling problem
+                # Check if this is a castling move:
+                if self.board.is_castling(move):
+                    self.handle_castling(move)
+                    if self.is_white_turn:
+                        self.move_list.append(move.uci())
+                else:
+                    self.capture_piece(clicked_square, self.selected_square)
+                    self.board.push(move)
+                    self.update_pieces()
+                    if self.is_white_turn:
+                        self.move_list.append(move.uci())
+                    self.update_database(self.selected_square, clicked_square)
+                
+                ## back to og (DO NOT REMOVE UNTIL TESTED FULLY)
+                # self.capture_piece(clicked_square, self.selected_square)
+                # self.board.push(move)
+                # self.update_pieces()
+                ## Store the move in the move list
+                # if self.is_white_turn:
+                #     self.move_list.append(move.uci())
+                ## Update the database
+                # self.update_database(self.selected_square, clicked_square)
 
-                # Store the move in the move list
-                if self.is_white_turn:
-                    self.move_list.append(move.uci())
 
-                # Update the database
-                self.update_database(self.selected_square, clicked_square)
                 # updates the visibility part of the database for player 1's perspective only
                 # I have it set to not because where it is located it will see the next player 1's move options therefore after the piece is moved
                 if not self.is_white_turn:
@@ -417,6 +433,49 @@ class ChessGUI:
 
             # Reset selected square
             self.selected_square = None
+
+    def handle_castling(self, move):
+        # Push the castling move onto the board and update the GUI.
+        self.board.push(move)
+        self.update_pieces()
+        
+        # Determine which castling move it is and update the database accordingly.
+        if self.is_white_turn:
+            if move.to_square == chess.G1:  # White kingside castling: King: E1 -> G1, Rook: H1 -> F1
+                self.update_database_castling('E1', 'G1', 'H1', 'F1', 'W')
+            elif move.to_square == chess.C1:  # White queenside castling: King: E1 -> C1, Rook: A1 -> D1
+                self.update_database_castling('E1', 'C1', 'A1', 'D1', 'W')
+        else:
+            if move.to_square == chess.G8:  # Black kingside castling: King: E8 -> G8, Rook: H8 -> F8
+                self.update_database_castling('E8', 'G8', 'H8', 'F8', 'B')
+            elif move.to_square == chess.C8:  # Black queenside castling: King: E8 -> C8, Rook: A8 -> D8
+                self.update_database_castling('E8', 'C8', 'A8', 'D8', 'B')
+
+    
+    def update_database_castling(self, king_from, king_to, rook_from, rook_to, color):
+        # Remove the king from its starting square
+        self.cursor.execute(
+            "UPDATE chessboard SET color = '', piece = '' WHERE col = ? AND rw = ?",
+            (king_from[0], int(king_from[1]))
+        )
+        # Place the king on its destination square
+        king_piece = 'K' if color == 'W' else 'k'
+        self.cursor.execute(
+            "UPDATE chessboard SET color = ?, piece = ? WHERE col = ? AND rw = ?",
+            (color, king_piece, king_to[0], int(king_to[1]))
+        )
+        # Remove the rook from its starting square
+        self.cursor.execute(
+            "UPDATE chessboard SET color = '', piece = '' WHERE col = ? AND rw = ?",
+            (rook_from[0], int(rook_from[1]))
+        )
+        # Place the rook on its destination square
+        rook_piece = 'R' if color == 'W' else 'r'
+        self.cursor.execute(
+            "UPDATE chessboard SET color = ?, piece = ? WHERE col = ? AND rw = ?",
+            (color, rook_piece, rook_to[0], int(rook_to[1]))
+        )
+        self.connection.commit()
 
     def capture_piece(self, clicked_square, selected_square):
         captured_piece = self.board.piece_at(clicked_square)

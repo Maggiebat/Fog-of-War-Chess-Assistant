@@ -1,6 +1,8 @@
 import google.generativeai as genai
 import json
 import re
+import tkinter as tk
+from tkinter import simpledialog
 
 class InputProcessor:
     def __init__(self):
@@ -16,6 +18,15 @@ class InputProcessor:
 
         # configure Gemini:
         genai.configure(api_key=api_key)
+
+    def bias(self):
+        root = tk.Tk()
+        root.withdraw()
+        input_value = simpledialog.askstring("Input", "Hello, what would you like me to do:")
+        if input_value is not None:
+            print("User input:", input_value)
+        user_input = self.main(input_value)
+        return user_input
 
     # sends user input to Gemini API & retrieves its output:
     def get_gemini_output(self, user_input):

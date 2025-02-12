@@ -7,15 +7,22 @@ from fow_engine import FoW_Engine1
 from pawn_promote import promote
 from tkinter import simpledialog
 from input_processor import InputProcessor
+from board_draw import DrawBoard
 
 class ChessGUI:
     def __init__(self, root):
         self.root = root
+        self.board = chess.Board()
         self.root.title("Two-Player Chess Game")
-        
         # Chess board size
         self.board_size = 8
         self.square_size = 64  # Size of each square in pixels
+        # Create Canvas to draw chessboard
+        self.canvas = tk.Canvas(self.root, width=self.board_size * self.square_size, height=self.board_size * self.square_size)
+        self.canvas.pack()
+        # makes instance of DrawBoard
+        self.board_draw = DrawBoard(self.root, self.board, self.board_size, self.square_size, self.canvas)
+
 
         self.moves = ""
         
@@ -52,24 +59,17 @@ class ChessGUI:
         self.refill_board()
 
         # Initialize python-chess board
-        self.board = chess.Board()
-
         self.turn_label = tk.Label(self.root, text="White's Turn", font=16)
         self.turn_label.pack()
 
-        # Create Canvas to draw chessboard
-        self.canvas = tk.Canvas(self.root, width=self.board_size * self.square_size, 
-                                height=self.board_size * self.square_size)
-        self.canvas.pack()
-
         # Load piece images
-        self.piece_images = self.load_piece_images()
+        # self.piece_images = DrawBoard.load_piece_images()
 
         # Draw the chessboard
-        self.draw_board()
+        self.board_draw.draw_board()
 
         # Place pieces on the board
-        self.update_pieces()
+        self.board_draw.update_pieces()
 
         # Bind click events to the board
         self.canvas.bind("<Button-1>", self.on_square_click)
@@ -243,14 +243,14 @@ class ChessGUI:
         print("Board has been filled with initial chess setup.")
 
 
-    # Loads the photos so that the GUI has chess pieces on the board
-    def load_piece_images(self):
-        """Load piece images from files (you can use any chess piece images here)."""
-        pieces = ["wp", "wr", "wn", "wb", "wq", "wk", "bp", "br", "bn", "bb", "bq", "bk"]
-        piece_images = {}
-        for piece in pieces:
-            piece_images[piece] = tk.PhotoImage(file=f"images/{piece}.png")
-        return piece_images
+    # # Loads the photos so that the GUI has chess pieces on the board
+    # def load_piece_images(self):
+    #     """Load piece images from files (you can use any chess piece images here)."""
+    #     pieces = ["wp", "wr", "wn", "wb", "wq", "wk", "bp", "br", "bn", "bb", "bq", "bk"]
+    #     piece_images = {}
+    #     for piece in pieces:
+    #         piece_images[piece] = tk.PhotoImage(file=f"images/{piece}.png")
+    #     return piece_images
     
     def draw_fog_white(self):
         """Draws a fog overlay on squares that aren't visible to the white player."""
@@ -308,55 +308,55 @@ class ChessGUI:
         print("Fog overlay has been drawn for black player.")
 
 
-    def draw_board(self):
-        """Draw the chessboard on the canvas."""
-        colors = ["#f5ffff", "#363838"]  # Light and dark squares
-        for row in range(self.board_size):
-            for col in range(self.board_size):
-                color = colors[(row + col) % 2]
-                x1 = col * self.square_size
-                y1 = row * self.square_size
-                x2 = x1 + self.square_size
-                y2 = y1 + self.square_size
-                self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+    # def draw_board(self):
+    #     """Draw the chessboard on the canvas."""
+    #     colors = ["#f5ffff", "#363838"]  # Light and dark squares
+    #     for row in range(self.board_size):
+    #         for col in range(self.board_size):
+    #             color = colors[(row + col) % 2]
+    #             x1 = col * self.square_size
+    #             y1 = row * self.square_size
+    #             x2 = x1 + self.square_size
+    #             y2 = y1 + self.square_size
+    #             self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
 
-    # Add column labels (A-H) at the top and bottom
-        for col in range(self.board_size):
-            letter = chr(65 + col)
+    #     # Add column labels (A-H) at the top and bottom
+    #     for col in range(self.board_size):
+    #         letter = chr(65 + col)
     
-    # Top labels
-            x_top = col * self.square_size + self.square_size // 1.2
-            y_top = self.square_size // 4  # Place near the top edge
-            self.canvas.create_text(x_top, y_top, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="s")
+    #         # Top labels
+    #         x_top = col * self.square_size + self.square_size // 1.2
+    #         y_top = self.square_size // 4  # Place near the top edge
+    #         self.canvas.create_text(x_top, y_top, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="s")
     
-    # Bottom labels
-            x_bottom = col * self.square_size + self.square_size // 1.09
-            y_bottom = self.board_size * self.square_size - self.square_size // 4  # Place near the bottom edge
-            self.canvas.create_text(x_bottom, y_bottom, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="n")
+    #         # Bottom labels
+    #         x_bottom = col * self.square_size + self.square_size // 1.09
+    #         y_bottom = self.board_size * self.square_size - self.square_size // 4  # Place near the bottom edge
+    #         self.canvas.create_text(x_bottom, y_bottom, text=letter, font=("Comic Sans MS", 7), fill="black", anchor="n")
     
-    # Add row labels (1-8)
-        for row in range(self.board_size):
-            number = str(self.board_size - row)  # Reverse order for chessboard
-            x = self.square_size // 4  # Adjust to position inside the board area
-            y = row * self.square_size + self.square_size // 5
-            self.canvas.create_text(x, y, text=number, font=("Comic Sans MS", 7), fill="black", anchor="e")
+    #     # Add row labels (1-8)
+    #     for row in range(self.board_size):
+    #         number = str(self.board_size - row)  # Reverse order for chessboard
+    #         x = self.square_size // 4  # Adjust to position inside the board area
+    #         y = row * self.square_size + self.square_size // 5
+    #         self.canvas.create_text(x, y, text=number, font=("Comic Sans MS", 7), fill="black", anchor="e")
 
-    def update_pieces(self):
-        """Place pieces on the board according to the current board state."""
-        # Clear all existing pieces from the board
-        self.canvas.delete("piece")
-        # Place pieces on the board
-        for row in range(8):
-            for col in range(8):
-                piece = self.board.piece_at(chess.square(col, 7 - row))
-                if piece:
-                    piece_str = piece.symbol().lower() if piece.color else piece.symbol()
-                    image = self.piece_images.get(f"{'w' if piece.color else 'b'}{piece_str.lower()}")
-                    if image:
-                        x = col * self.square_size
-                        y = row * self.square_size
-                        self.canvas.create_image(x + self.square_size // 2, y + self.square_size // 2, 
-                                                 image=image, tags="piece")
+    # def update_pieces(self):
+    #     """Place pieces on the board according to the current board state."""
+    #     # Clear all existing pieces from the board
+    #     self.canvas.delete("piece")
+    #     # Place pieces on the board
+    #     for row in range(8):
+    #         for col in range(8):
+    #             piece = self.board.piece_at(chess.square(col, 7 - row))
+    #             if piece:
+    #                 piece_str = piece.symbol().lower() if piece.color else piece.symbol()
+    #                 image = self.piece_images.get(f"{'w' if piece.color else 'b'}{piece_str.lower()}")
+    #                 if image:
+    #                     x = col * self.square_size
+    #                     y = row * self.square_size
+    #                     self.canvas.create_image(x + self.square_size // 2, y + self.square_size // 2, 
+    #                                              image=image, tags="piece")
 
     def on_square_click(self, event):
         """Handle click events to select and move pieces."""
@@ -392,7 +392,7 @@ class ChessGUI:
                 else:
                     self.capture_piece(clicked_square, self.selected_square)
                     self.board.push(move)
-                    self.update_pieces()
+                    self.board_draw.update_pieces()
                     if self.is_white_turn:
                         self.move_list.append(move.uci())
                     self.update_database(self.selected_square, clicked_square)
@@ -434,10 +434,11 @@ class ChessGUI:
             # Reset selected square
             self.selected_square = None
 
+    # Extra move is handled and then set to a seperate function that updates the board
     def handle_castling(self, move):
         # Push the castling move onto the board and update the GUI.
         self.board.push(move)
-        self.update_pieces()
+        self.board_draw.update_pieces()
         
         # Determine which castling move it is and update the database accordingly.
         if self.is_white_turn:
@@ -451,7 +452,7 @@ class ChessGUI:
             elif move.to_square == chess.C8:  # Black queenside castling: King: E8 -> C8, Rook: A8 -> D8
                 self.update_database_castling('E8', 'C8', 'A8', 'D8', 'B')
 
-    
+    # updates the SQLite table to reflect the 2 move in 1 due to castling
     def update_database_castling(self, king_from, king_to, rook_from, rook_to, color):
         # Remove the king from its starting square
         self.cursor.execute(

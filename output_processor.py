@@ -6,7 +6,16 @@ from tkinter import messagebox
 class OutputProcessor:
     def __init__(self):
         # api key:
-        genai.configure(api_key="AIzaSyDh37esnX-KiysJhqx9P1OeWGUw67xjNh8")
+        try:
+            with open("config.json", "r") as f:
+                config = json.load(f)
+                api_key = config.get("api_key")
+                if not api_key:
+                    raise ValueError("API key is missing from config.json")
+        except FileNotFoundError:
+            raise FileNotFoundError("config.json not found. Please create it with your API key.")
+        # configure Gemini:
+        genai.configure(api_key=api_key)
 
     # sends user input to Gemini API & retrieves its output:
     def get_gemini_output(self, move_suggestion):

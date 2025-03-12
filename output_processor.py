@@ -1,57 +1,59 @@
-import google.generativeai as genai
-import json
-import tkinter as tk
-from tkinter import messagebox
+import requests
+import re
 
 class OutputProcessor:
     def __init__(self):
-        # api key:
-        try:
-            with open("config.json", "r") as f:
-                config = json.load(f)
-                api_key = config.get("api_key")
-                if not api_key:
-                    raise ValueError("API key is missing from config.json")
-        except FileNotFoundError:
-            raise FileNotFoundError("config.json not found. Please create it with your API key.")
-        # configure Gemini:
-        genai.configure(api_key=api_key)
+        # Hugging Face API key:
+        self.api_key = "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"
+        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+        self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
-    # sends user input to Gemini API & retrieves its output:
-    def get_gemini_output(self, move_suggestion):
+    # Sends user input to Hugging Face API & retrieves output:
+    def get_mistral_output(self, move_suggestion):
+        prompt = (
+            f"Convey the following chess move suggestion in a mildly friendly (but stil professional), casual tone: {move_suggestion} "
+            "Just provide the move suggestion and thorough explanation, given the information that you have in the limited Fog of War environment."
+            "Avoid unnecessary phrases such as 'hey there', 'hope this helps', and 'have fun, and 'good luck.'"
+            "Do not call the user 'friend.'"
+        )
 
-        # get model:
-        model = genai.GenerativeModel("gemini-1.5-flash-8b")
+        # API request to Hugging Face:
+        data = {"inputs": prompt}
+        response = requests.post(self.api_url, headers=self.headers, json=data)
 
-        # generate response:
-        response = model.generate_content("You are part of a helpful Fog of War Chess Assistant. "
-                "You are the part of the Assistant that conveys the move suggestion to the advantaged player that gets "
-                                          "to use the Chess Assistant. Use your own discretion to deliver this message"
-                                          "in a straightforward but mildly friendly tone. Keep it professional. Do not"
-                                          "mention the engine as a separate entity. For the user, it is YOU making the"
-                                          "suggestion, so make it sound as such."
-                "Here is the move the engine came up with: " + move_suggestion) # include move suggestion from engine in model prompt
+        if response.status_code == 200:
+            result = response.json()
+            raw_output = result[0]["generated_text"].strip() if result else "No response generated."
+            return self.clean_response(raw_output)
+        else:
+            return f"Error: {response.status_code} - {response.text}"
 
-        # return response:
-        return response.text
+    # Removes unnecessary instructions from the LLM output:
+    def clean_response(self, response_text):
+        """
+        Removes everything before 'Suggested Move:' to keep only the move suggestion and explanation.
+        """
+        keyword = "Example:"
+        if keyword in response_text:
+            return response_text.split(keyword, 1)[-1].strip()  # Keep only the part after "'friend.'"
+        return response_text  # If keyword not found, return original response
 
-
-    # takes engine move suggestion output, returns Assistant chat message to relay to user:
+    # Takes engine move suggestion output & returns Assistant message to user:
     def main(self, move_suggestion):
-        output = self.get_gemini_output(move_suggestion)
-        messagebox.showinfo("Move Suggesstion", output)
+        output = self.get_mistral_output(move_suggestion)
         return output
 
 
 if __name__ == "__main__":
 
-    # example engine output:
+    # Example engine output:
     ex_engine_move_suggestion = "Suggested Move: Move Q from D1 to D6."
 
-    # instantiate class:
+    # Instantiate class:
     processor = OutputProcessor()
 
-    # process move suggestion:
+    # Process move suggestion:
     result = processor.main(ex_engine_move_suggestion)
 
-    print(result)
+    print("\n", "The move suggestion from the engine was: ", '"' + ex_engine_move_suggestion + '"')
+    print("Output Processor output: ", result, "\n")

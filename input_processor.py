@@ -1,59 +1,101 @@
+import json
 import requests
-import re
 
-class OutputProcessor:
+class InputProcessor:
     def __init__(self):
-        # Hugging Face API key:
+        # Hugging Face API key
         self.api_key = "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"
-        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+        self.mistral_api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
-    # Sends user input to Hugging Face API & retrieves output:
-    def get_mistral_output(self, move_suggestion):
+    # Step 1: Get structured response from Mistral
+    def get_mistral_output(self, user_input):
         prompt = (
-            f"Convey the following chess move suggestion in a mildly friendly (but stil professional), casual tone: {move_suggestion} "
-            "Just provide the move suggestion and thorough explanation, given the information that you have in the limited Fog of War environment."
-            "Avoid unnecessary phrases such as 'hey there', 'hope this helps', and 'have fun, and 'good luck.'"
-            "Do not call the user 'friend.'"
+            "You are a helpful assistant. Respond **only** in JSON format with these fields:\n"
+            "1. 'severity': A score (1-5) based on urgency according to the user.\n"
+            "2. 'piece': The opponent's chess piece involved.\n"
+            "3. 'action': The exact desired action (counter, punish, take, analyze, etc).\n"
+            "4. 'preference': Whether the user is saying directly that the opponent overuses the piece (true/false).\n"
+            "5. 'force forks': Whether the user is saying directly that the opponent tries to force forks (true/false).\n"
+            f"User input: {user_input}\n\n"
+            "Respond **ONLY** with a valid JSON object, with no extra text, explanations, or greetings."
         )
 
-        # API request to Hugging Face:
         data = {"inputs": prompt}
-        response = requests.post(self.api_url, headers=self.headers, json=data)
+        response = requests.post(self.mistral_api_url, headers=self.headers, json=data)
 
         if response.status_code == 200:
             result = response.json()
-            raw_output = result[0]["generated_text"].strip() if result else "No response generated."
-            return self.clean_response(raw_output)
+            raw_output = result[0]["generated_text"].strip() if result else None
+
+            if not raw_output:
+                print("Warning: Empty response from Mistral")
+                return None
+
+            # print("🔍 Raw Mistral Output:", raw_output)  # for debugging
+            return self.extract_json(raw_output)
         else:
-            return f"Error: {response.status_code} - {response.text}"
+            print(f"API Error: {response.status_code} - {response.text}")
+            return None
 
-    # Removes unnecessary instructions from the LLM output:
-    def clean_response(self, response_text):
+    # Extracts only the JSON portion from Mistral's response
+    def extract_json(self, response_text):
         """
-        Removes everything before 'Suggested Move:' to keep only the move suggestion and explanation.
+        Removes unnecessary text and extracts only the JSON portion.
         """
-        keyword = "Example:"
-        if keyword in response_text:
-            return response_text.split(keyword, 1)[-1].strip()  # Keep only the part after "'friend.'"
-        return response_text  # If keyword not found, return original response
+        try:
+            json_start = response_text.find("{")
+            json_end = response_text.rfind("}") + 1
 
-    # Takes engine move suggestion output & returns Assistant message to user:
-    def main(self, move_suggestion):
-        output = self.get_mistral_output(move_suggestion)
-        return output
+            if json_start == -1 or json_end == -1:
+                print("Warning: No valid JSON found in Mistral's response.")
+                return None
+
+            json_string = response_text[json_start:json_end]
+            return json_string.strip()
+        except Exception as e:
+            print(f"JSON Extraction Error: {e}")
+            return None
+
+    # Parses JSON safely
+    def parse_structured_data(self, json_string):
+        """
+        Parses the extracted JSON safely.
+        """
+        try:
+            if json_string:
+                data_dict = json.loads(json_string)
+
+                formatted_dict = {
+                    "severity": int(data_dict.get("severity", 0)),
+                    "piece": str(data_dict.get("piece", "")),
+                    "action": str(data_dict.get("action", "")),
+                    "preference": bool(data_dict.get("preference", False)),
+                    "force forks": bool(data_dict.get("force forks", False)),
+                }
+                return formatted_dict
+            else:
+                print("Warning: No valid JSON string provided for parsing.")
+                return None
+        except json.JSONDecodeError as e:
+            print(f"JSON Decode Error: {e}")
+            print(f"Raw JSON String: {json_string}")
+            return None
+
+    # Main function to process user input
+    def main(self, user_input):
+        output_str = self.get_mistral_output(user_input)
+
+        if output_str:
+            return self.parse_structured_data(output_str)
+        else:
+            print("No valid output received from Mistral.")
+            return None
 
 
 if __name__ == "__main__":
-
-    # Example engine output:
-    ex_engine_move_suggestion = "Suggested Move: Move Q from D1 to D6."
-
-    # Instantiate class:
-    processor = OutputProcessor()
-
-    # Process move suggestion:
-    result = processor.main(ex_engine_move_suggestion)
-
-    print("\n", "The move suggestion from the engine was: ", '"' + ex_engine_move_suggestion + '"')
-    print("Output Processor output: ", result, "\n")
+    processor = InputProcessor()
+    user_input = "To win I must punish my opponent for over-utilizing the queen."
+    result = processor.main(user_input)
+    print('\n', "The user input was: ", '"' + user_input + '"')
+    print("Input Processor Output:", result, '\n')

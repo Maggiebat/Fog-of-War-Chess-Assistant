@@ -1,104 +1,59 @@
-import google.generativeai as genai
-import json
+import requests
 import re
-import tkinter as tk
-from tkinter import simpledialog
 
-class InputProcessor:
+class OutputProcessor:
     def __init__(self):
-        # load API key from config file:
-        try:
-            with open("config.json", "r") as f:
-                config = json.load(f)
-                api_key = config.get("api_key")
-                if not api_key:
-                    raise ValueError("API key is missing from config.json")
-        except FileNotFoundError:
-            raise FileNotFoundError("config.json not found. Please create it with your API key.")
+        # Hugging Face API key:
+        self.api_key = "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"
+        self.api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+        self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
-        # configure Gemini:
-        genai.configure(api_key=api_key)
+    # Sends user input to Hugging Face API & retrieves output:
+    def get_mistral_output(self, move_suggestion):
+        prompt = (
+            f"Convey the following chess move suggestion in a mildly friendly (but stil professional), casual tone: {move_suggestion} "
+            "Just provide the move suggestion and thorough explanation, given the information that you have in the limited Fog of War environment."
+            "Avoid unnecessary phrases such as 'hey there', 'hope this helps', and 'have fun, and 'good luck.'"
+            "Do not call the user 'friend.'"
+        )
 
-    def bias(self):
-        root = tk.Tk()
-        root.withdraw()
-        input_value = simpledialog.askstring("Input", "Hello, what would you like me to do:")
-        if input_value is not None:
-            print("User input:", input_value)
-        user_input = self.main(input_value)
-        return user_input
+        # API request to Hugging Face:
+        data = {"inputs": prompt}
+        response = requests.post(self.api_url, headers=self.headers, json=data)
 
-    # sends user input to Gemini API & retrieves its output:
-    def get_gemini_output(self, user_input):
+        if response.status_code == 200:
+            result = response.json()
+            raw_output = result[0]["generated_text"].strip() if result else "No response generated."
+            return self.clean_response(raw_output)
+        else:
+            return f"Error: {response.status_code} - {response.text}"
 
-        # get model:
-        model = genai.GenerativeModel("gemini-1.5-flash-8b")
-
-        # generate response:
-        response = model.generate_content("You are part of a helpful Fog of War Chess Assistant. "
-                "Structure the following user input into a JSON format with these fields: "
-                "1. 'severity': a score based on the user's perceived urgency by using words like 'need' vs 'want', "
-                                          "'must' or 'imperative', 'first priority' (1-5)."
-                "2 'piece': the opponent's chess piece mentioned in the input. "
-                "3. 'action': the desired action the user wants to take (counter, take, analyze, punish, remove, "
-                                          "neutralize, etc). "
-                "4. 'preference': whether the opponent has a preference for or over utilizes 'piece' (true or false). "
-                "5. 'force forks': whether the opponent will try to force forks with 'piece' (true or false). "
-                "Here is the input: " + user_input)
-
-        # return response as string:
-        return response.text
-
-
-    # turns gemini output into python dictionary:
-    def parse_structured_data(self, input_string):
+    # Removes unnecessary instructions from the LLM output:
+    def clean_response(self, response_text):
         """
-        Extracts only the JSON portion from the API response and parses it safely.
+        Removes everything before 'Suggested Move:' to keep only the move suggestion and explanation.
         """
+        keyword = "Example:"
+        if keyword in response_text:
+            return response_text.split(keyword, 1)[-1].strip()  # Keep only the part after "'friend.'"
+        return response_text  # If keyword not found, return original response
 
-        try:
-            # Use regex to find the JSON object in the response
-            match = re.search(r"\{.*\}", input_string, re.DOTALL)
-            if match:
-                json_string = match.group(0)  # Extract JSON part
-                data_dict = json.loads(json_string)  # Parse JSON
-
-                # Convert values to the desired format:
-                formatted_dict = {
-                    "severity": int(data_dict.get("severity", 0)),
-                    "piece": str(data_dict.get("piece", "")),
-                    "action": str(data_dict.get("action", "")),
-                    "preference": bool(data_dict.get("preference", False)),
-                    "force forks": bool(data_dict.get("force forks", False)),
-                }
-
-                return formatted_dict
-            else:
-                print("Error: Could not extract valid JSON from response.")
-                return None
-
-        except json.JSONDecodeError as e:
-            print(f"JSON Decode Error: {e}")
-            return None
-
-
-    # takes user input, returns dictionary structure of important information:
-    def main(self, user_input):
-        output_str = self.get_gemini_output(user_input)
-        output_dict = self.parse_structured_data(output_str)
-
-        return output_dict
+    # Takes engine move suggestion output & returns Assistant message to user:
+    def main(self, move_suggestion):
+        output = self.get_mistral_output(move_suggestion)
+        return output
 
 
 if __name__ == "__main__":
 
-    # example user input:
-    user_input = "To win I must punish my opponent for over utilizing queen"
+    # Example engine output:
+    ex_engine_move_suggestion = "Suggested Move: Move Q from D1 to D6."
 
-    # instantiate class:
-    processor = InputProcessor()
+    # Instantiate class:
+    processor = OutputProcessor()
 
-    # process input:
-    result = processor.main(user_input)
+    # Process move suggestion:
+    result = processor.main(ex_engine_move_suggestion)
 
-    print(result)
+    print("\n", "The move suggestion from the engine was: ", '"' + ex_engine_move_suggestion + '"')
+    print("Output Processor output: ", result, "\n")

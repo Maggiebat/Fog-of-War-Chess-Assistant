@@ -1,0 +1,828 @@
+Test Case #1
+User input: I know my opponent has a preference for his rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #2
+User input: I know my opponent has a preference for her rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'prepare counter', 'preference': True, 'force forks': False}
+
+Test Case #3
+User input: I know my opponent has a preference for their rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #4
+User input: I want to counter my opponent’s rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #5
+User input: I want to counter his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #6
+User input: I want to counter her rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #7
+User input: I want to counter their rooks
+JSON output: {'severity': 2, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #8
+User input: I want to take my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #9
+User input: I want to take his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #10
+User input: I want to take her rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #11
+User input: I want to take their rooks
+JSON output: {'severity': 5, 'piece': 'rook', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #12
+User input: It is my first priority to counter my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #13
+User input: It is in my best interest to counter my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #14
+User input: It is imperative that I remove my opponent’s rooks from game play
+JSON output: {'severity': 5, 'piece': 'rooks', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #15
+User input: To win I must counter my opponent’s rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #16
+User input: To win I must counter his rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': True}
+
+Test Case #17
+User input: To win I must counter her rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #18
+User input: To win I must counter their rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #19
+User input: To win I must punish my opponent for over utilizing rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #20
+User input: To win I must punish my opponent for over utilizing his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #21
+User input: To win I must punish my opponent for over utilizing her rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #22
+User input: To win I must punish my opponent for over utilizing their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #23
+User input: To maintain material advantage I need to neutralize my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #24
+User input: To maintain material advantage I need to neutralize his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #25
+User input: To maintain material advantage I need to neutralize her rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #26
+User input: To maintain material advantage I need to neutralize their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #27
+User input: I know my opponent over utilizes his rooks
+JSON output: {'severity': 2, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #28
+User input: I know my opponent over utilizes her rooks
+JSON output: {'severity': 3, 'piece': 'string', 'action': 'string', 'preference': True, 'force forks': True}
+
+Test Case #29
+User input: I know my opponent over utilizes their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'plan against', 'preference': True, 'force forks': False}
+
+Test Case #30
+User input: I know my opponent has a preference for his knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #31
+User input: I know my opponent has a preference for her knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'watch for attacks', 'preference': True, 'force forks': False}
+
+Test Case #32
+User input: I know my opponent has a preference for their knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #33
+User input: I want to counter my opponent’s knights
+JSON output: {'severity': 3, 'piece': 'n', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #34
+User input: I want to counter his knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #35
+User input: I want to counter her knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #36
+User input: I want to counter their knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #37
+User input: I want to take my opponent’s knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #38
+User input: I want to take his knights
+JSON output: {'severity': 5, 'piece': 'knight', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #39
+User input: I want to take her knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #40
+User input: I want to take their knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #41
+User input: It is my first priority to counter my opponent’s knights
+JSON output: {'severity': 4, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #42
+User input: It is in my best interest to counter my opponent’s knights
+JSON output: None
+
+Test Case #43
+User input: It is imperative that I remove my opponent’s knights from game play
+JSON output: {'severity': 4, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #44
+User input: To win I must counter my opponent’s knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #45
+User input: To win I must counter his knights
+JSON output: None
+
+Test Case #46
+User input: To win I must counter her knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #47
+User input: To win I must counter their knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #48
+User input: To win I must punish my opponent for over utilizing knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #49
+User input: To win I must punish my opponent for over utilizing his knights
+JSON output: {'severity': 3, 'piece': 'n', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #50
+User input: To win I must punish my opponent for over utilizing her knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #51
+User input: To win I must punish my opponent for over utilizing their knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #52
+User input: To maintain material advantage I need to neutralize my opponent’s knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #53
+User input: To maintain material advantage I need to neutralize his knights
+JSON output: {'severity': 2, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #54
+User input: To maintain material advantage I need to neutralize her knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #55
+User input: To maintain material advantage I need to neutralize their knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #56
+User input: I know my opponent over utilizes his knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #57
+User input: I know my opponent over utilizes her knights
+JSON output: {'severity': 4, 'piece': 'knight', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #58
+User input: I know my opponent over utilizes their knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'punish', 'preference': True, 'force forks': True}
+
+Test Case #59
+User input: My opponent will try to force forks with his knights
+JSON output: {'severity': 3, 'piece': 'knight', 'action': 'defend', 'preference': False, 'force forks': True}
+
+Test Case #60
+User input: My opponent will try to force forks with her knights
+JSON output: {'severity': 3, 'piece': 'knights', 'action': 'counter', 'preference': False, 'force forks': True}
+
+Test Case #61
+User input: My opponent will try to force forks with their knights
+JSON output: {'severity': 4, 'piece': 'knight', 'action': 'counter', 'preference': False, 'force forks': True}
+
+Test Case #62
+User input: My opponent will try to force forks with knights
+JSON output: {'severity': 3, 'piece': 'knights', 'action': 'defend', 'preference': True, 'force forks': True}
+
+Test Case #63
+User input: I know my opponent has a preference for his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #64
+User input: I know my opponent has a preference for her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #65
+User input: I know my opponent has a preference for their Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #66
+User input: I want to counter my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #67
+User input: I want to counter his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #68
+User input: I want to counter her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #69
+User input: I want to counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #70
+User input: I want to take my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #71
+User input: I want to take his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #72
+User input: I want to take her Bishop
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #73
+User input: I want to take their Bishop
+JSON output: {'severity': 1, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #74
+User input: It is my first priority to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'b', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #75
+User input: It is in my best interest to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #76
+User input: It is imperative that I remove my opponent’s Bishop from game play
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #77
+User input: To win I must counter my opponent’s Bishop
+JSON output: None
+
+Test Case #78
+User input: To win I must counter his Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #79
+User input: To win I must counter her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #80
+User input: To win I must counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #81
+User input: To win I must punish my opponent for over utilizing Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #82
+User input: To win I must punish my opponent for over utilizing his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #83
+User input: To win I must punish my opponent for over utilizing her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #84
+User input: To win I must punish my opponent for over utilizing their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #85
+User input: To maintain material advantage I need to neutralize my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #86
+User input: To maintain material advantage I need to neutralize his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #87
+User input: To maintain material advantage I need to neutralize her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': True}
+
+Test Case #88
+User input: To maintain material advantage I need to neutralize their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #89
+User input: I know my opponent over utilizes his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #90
+User input: I know my opponent over utilizes her Bishop
+JSON output: {'severity': 4, 'piece': 'b', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #91
+User input: I know my opponent over utilizes their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #92
+User input: I know my opponent has a preference for his rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #93
+User input: I know my opponent has a preference for her rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'prepare counter', 'preference': True, 'force forks': False}
+
+Test Case #94
+User input: I know my opponent has a preference for their rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #95
+User input: I want to counter my opponent’s rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #96
+User input: I want to counter his rooks
+JSON output: None
+
+Test Case #97
+User input: I want to counter her rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #98
+User input: I want to counter their rooks
+JSON output: {'severity': 2, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #99
+User input: I want to take my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #100
+User input: I want to take his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #101
+User input: I want to take her rooks
+JSON output: {'severity': 2, 'piece': 'rook', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #102
+User input: I want to take their rooks
+JSON output: {'severity': 5, 'piece': 'rook', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #103
+User input: It is my first priority to counter my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #104
+User input: It is in my best interest to counter my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #105
+User input: It is imperative that I remove my opponent’s rooks from game play
+JSON output: {'severity': 5, 'piece': 'rooks', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #106
+User input: To win I must counter my opponent’s rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #107
+User input: To win I must counter his rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': True}
+
+Test Case #108
+User input: To win I must counter her rooks
+JSON output: {'severity': 4, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #109
+User input: To win I must counter their rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #110
+User input: To win I must punish my opponent for over utilizing rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #111
+User input: To win I must punish my opponent for over utilizing his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #112
+User input: To win I must punish my opponent for over utilizing her rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #113
+User input: To win I must punish my opponent for over utilizing their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #114
+User input: To maintain material advantage I need to neutralize my opponent’s rooks
+JSON output: {'severity': 4, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #115
+User input: To maintain material advantage I need to neutralize his rooks
+JSON output: {'severity': 3, 'piece': 'rook', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #116
+User input: To maintain material advantage I need to neutralize her rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #117
+User input: To maintain material advantage I need to neutralize their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #118
+User input: I know my opponent over utilizes his rooks
+JSON output: {'severity': 2, 'piece': 'rooks', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #119
+User input: I know my opponent over utilizes her rooks
+JSON output: {'severity': 3, 'piece': 'string', 'action': 'string', 'preference': True, 'force forks': True}
+
+Test Case #120
+User input: I know my opponent over utilizes their rooks
+JSON output: {'severity': 3, 'piece': 'rooks', 'action': 'plan against', 'preference': True, 'force forks': False}
+
+Test Case #121
+User input: I know my opponent has a preference for his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #122
+User input: I know my opponent has a preference for her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #123
+User input: I know my opponent has a preference for their Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #124
+User input: I want to counter my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #125
+User input: I want to counter his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #126
+User input: I want to counter her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #127
+User input: I want to counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #128
+User input: I want to take my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #129
+User input: I want to take his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #130
+User input: I want to take her Bishop
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #131
+User input: I want to take their Bishop
+JSON output: {'severity': 1, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #132
+User input: It is my first priority to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'b', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #133
+User input: It is in my best interest to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #134
+User input: It is imperative that I remove my opponent’s Bishop from game play
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #135
+User input: To win I must counter my opponent’s Bishop
+JSON output: None
+
+Test Case #136
+User input: To win I must counter his Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #137
+User input: To win I must counter her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #138
+User input: To win I must counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #139
+User input: To win I must punish my opponent for over utilizing Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #140
+User input: I know my opponent has a preference for his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #141
+User input: I know my opponent has a preference for her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #142
+User input: I know my opponent has a preference for their Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #143
+User input: I want to counter my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #144
+User input: I want to counter his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #145
+User input: I want to counter her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #146
+User input: I want to counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #147
+User input: I want to take my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #148
+User input: I want to take his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #149
+User input: I want to take her Bishop
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #150
+User input: I want to take their Bishop
+JSON output: {'severity': 1, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #151
+User input: It is my first priority to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'b', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #152
+User input: It is in my best interest to counter my opponent’s Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #153
+User input: It is imperative that I remove my opponent’s Bishop from game play
+JSON output: {'severity': 5, 'piece': 'bishop', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #154
+User input: To win I must counter my opponent’s Bishop
+JSON output: None
+
+Test Case #155
+User input: To win I must counter his Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #156
+User input: To win I must counter her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #157
+User input: To win I must counter their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #158
+User input: To win I must punish my opponent for over utilizing Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #159
+User input: To win I must punish my opponent for over utilizing his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #160
+User input: To win I must punish my opponent for over utilizing her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #161
+User input: To win I must punish my opponent for over utilizing their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #162
+User input: To maintain material advantage I need to neutralize my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #163
+User input: To maintain material advantage I need to neutralize his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #164
+User input: To maintain material advantage I need to neutralize her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': True}
+
+Test Case #165
+User input: To maintain material advantage I need to neutralize their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #166
+User input: I know my opponent over utilizes his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #167
+User input: I know my opponent over utilizes her Bishop
+JSON output: {'severity': 4, 'piece': 'b', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #168
+User input: I know my opponent over utilizes their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #169
+User input: To win I must punish my opponent for over utilizing his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #170
+User input: To win I must punish my opponent for over utilizing her Bishop
+JSON output: {'severity': 4, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #171
+User input: To win I must punish my opponent for over utilizing their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #172
+User input: To maintain material advantage I need to neutralize my opponent’s Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #173
+User input: To maintain material advantage I need to neutralize his Bishop
+JSON output: {'severity': 2, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #174
+User input: To maintain material advantage I need to neutralize her Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': True}
+
+Test Case #175
+User input: To maintain material advantage I need to neutralize their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #176
+User input: I know my opponent over utilizes his Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #177
+User input: I know my opponent over utilizes her Bishop
+JSON output: {'severity': 4, 'piece': 'b', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #178
+User input: I know my opponent over utilizes their Bishop
+JSON output: {'severity': 3, 'piece': 'bishop', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #179
+User input: I know my opponent has a preference for his queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #180
+User input: I know my opponent has a preference for her queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'monitor', 'preference': True, 'force forks': False}
+
+Test Case #181
+User input: I know my opponent has a preference for their queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'analyze', 'preference': True, 'force forks': False}
+
+Test Case #182
+User input: I want to counter my opponent’s queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #183
+User input: I want to counter his queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #184
+User input: I want to counter her queen
+JSON output: None
+
+Test Case #185
+User input: I want to counter their queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #186
+User input: I want to take my opponent’s queen
+JSON output: {'severity': 5, 'piece': 'queen', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #187
+User input: I want to take his queen
+JSON output: {'severity': 5, 'piece': 'queen', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #188
+User input: I want to take her queen
+JSON output: {'severity': 5, 'piece': 'queen', 'action': 'take', 'preference': False, 'force forks': False}
+
+Test Case #189
+User input: I want to take their queen
+JSON output: {'severity': 5, 'piece': 'queen', 'action': 'take', 'preference': True, 'force forks': False}
+
+Test Case #190
+User input: It is my first priority to counter my opponent’s queen
+JSON output: {'severity': 4, 'piece': 'queen', 'action': 'counter', 'preference': True, 'force forks': False}
+
+Test Case #191
+User input: It is in my best interest to counter my opponent’s queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #192
+User input: It is imperative that I remove my opponent’s queen from game play
+JSON output: {'severity': 5, 'piece': 'queen', 'action': 'target', 'preference': True, 'force forks': False}
+
+Test Case #193
+User input: To win I must counter my opponent’s queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #194
+User input: To win I must counter his queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #195
+User input: To win I must counter her queen
+JSON output: None
+
+Test Case #196
+User input: To win I must counter their queen
+JSON output: None
+
+Test Case #197
+User input: To win I must punish my opponent for over utilizing queen
+JSON output: {'severity': 4, 'piece': 'queen', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #198
+User input: To win I must punish my opponent for over utilizing his queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #199
+User input: To win I must punish my opponent for over utilizing her queen
+JSON output: {'severity': 2, 'piece': 'queen', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #200
+User input: To win I must punish my opponent for over utilizing their queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'punish', 'preference': True, 'force forks': False}
+
+Test Case #201
+User input: To maintain material advantage I need to neutralize my opponent’s queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'analysis', 'preference': False, 'force forks': False}
+
+Test Case #202
+User input: To maintain material advantage I need to neutralize his queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #203
+User input: To maintain material advantage I need to neutralize her queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #204
+User input: To maintain material advantage I need to neutralize their queen
+JSON output: {'severity': 3, 'piece': 'queen', 'action': 'counter', 'preference': False, 'force forks': False}
+
+Test Case #205
+User input: I know my opponent over utilizes his queen
+JSON output: None
+
+Test Case #206
+User input: I know my opponent over utilizes her queen
+JSON output: None
+
+Test Case #207
+User input: I know my opponent over utilizes their queen
+JSON output: None
+

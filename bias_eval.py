@@ -1,6 +1,6 @@
 import chess
 
-
+########BIAS EVALUATIONS NEEDS WORK
 class BiasScorer:
     def __init__(self, bias):
         self.bias = bias  # The bias dictionary passed from the engine
@@ -72,6 +72,6 @@ class BiasScorer:
 
     def is_counter_move(self, move, board):
         board.push(move)
-        is_counter = board.is_check()  # Placeholder - this can be expanded
+        is_counter = board.is_check()  # This needs work
         board.pop()
         return is_counter

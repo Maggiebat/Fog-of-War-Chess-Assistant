@@ -1,5 +1,7 @@
 import json
 import requests
+import tkinter as tk
+from tkinter import simpledialog
 
 class InputProcessor:
     def __init__(self):
@@ -82,6 +84,18 @@ class InputProcessor:
             print(f"Raw JSON String: {json_string}")
             return None
 
+    def bias(self):
+        root = tk.Tk()
+        root.withdraw()
+        input_value = simpledialog.askstring("Input", "Hello, what would you like me to do:")
+        if input_value:
+            print("User input:", input_value)
+            result = self.main(input_value)  # Process the input
+            return result  # Return the structured data directly
+        else:
+            print("No input provided.")
+            return None
+
     # Main function to process user input
     def main(self, user_input):
         output_str = self.get_mistral_output(user_input)
@@ -95,7 +109,9 @@ class InputProcessor:
 
 if __name__ == "__main__":
     processor = InputProcessor()
-    user_input = "To win I must punish my opponent for over-utilizing the queen."
-    result = processor.main(user_input)
-    print('\n', "The user input was: ", '"' + user_input + '"')
-    print("Input Processor Output:", result, '\n')
+    result = processor.bias()  # This returns structured data directly
+
+    if result:
+        print('\n', "Processed Output:", result, '\n')
+    else:
+        print("Failed to obtain valid processed output.")

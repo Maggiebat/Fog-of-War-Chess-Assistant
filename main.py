@@ -69,21 +69,23 @@ class ChessGUI:
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
         print_captured_button.pack(side=tk.LEFT)
         # ran here once to set up original visibility for player 1
-        self.database.update_visibility_white(list(self.board.legal_moves))
+        self.database.update_visibility_white(list(self.board.pseudo_legal_moves))
         # ran here once to set up original visibility for player 2
-        self.database.update_visibility_black(list(self.board.legal_moves))
+        self.database.update_visibility_black(list(self.board.pseudo_legal_moves))
         # white starts first therefore we run this here
         self.board_draw.draw_fog_white()
     
     def print_captured_pieces(self):
         """Print the captured pieces for both players."""
-        print(f"Captured White Pieces: {self.play_game.captured_pieces['W']}")
-        print(f"Captured Black Pieces: {self.play_game.captured_pieces['B']}")
+        captured_list = []
         self.cursor.execute("SELECT * FROM captured;")
         results = self.cursor.fetchall()
         # Print each row to the console
         for row in results:
-            print(row)  # Prints each row from the database
+            print(row[0])  # Prints each row from the database
+            captured_list.append(row[0])
+        messagebox.showinfo("Captured Peices", captured_list)
+
 
     # make this an accessible list throughout code
     def print_legal_moves(self, legal_moves):

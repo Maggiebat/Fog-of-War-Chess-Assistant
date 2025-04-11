@@ -27,21 +27,29 @@ class GameOver:
         print("Game ended")
 
     def check_game_over(self, is_white_turn):
+        captured_list = []
+        self.cursor.execute("SELECT * FROM captured;")
+        results = self.cursor.fetchall()
+        # Print each row to the console
+        for captured in results:
+            print(captured[0])  # Prints each row from the database
+            captured_list.append(captured[0])
+
         """Check if the game is over (checkmate, stalemate, etc.)."""
-        if self.board.is_checkmate():
-            winner = "Black" if not self.is_white_turn else "White"
+        if len(captured_list) > 1 and (captured_list[-1] == 'K' or captured_list[-1] == 'k'):
+            winner = "Black" if not is_white_turn else "White"
             messagebox.showinfo("Checkmate", f"{winner} wins!")
             self.quit_game()
-            print(self.moves)
+            # print(self.moves)
             return True
         elif self.board.is_stalemate():
             messagebox.showinfo("Stalemate", "It's a draw!")
             self.quit_game()
-            print(self.moves)
+            # print(self.moves)
             return True
         elif self.board.is_insufficient_material():
             messagebox.showinfo("Draw", "Insufficient material for checkmate!")
             self.quit_game()
-            print(self.moves)
+            # print(self.moves)
             return True
         return False

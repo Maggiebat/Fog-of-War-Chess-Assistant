@@ -25,7 +25,6 @@ class PlayGame:
         self.engine = engine
         self.turn_label = tk.Label(self.root, text="White's Turn", font=16)
         self.turn_label.pack()
-        self.captured_pieces = {"W": [], "B": []}
         self.bias = bias
 
     def update_suggest_button_state(self):
@@ -76,7 +75,7 @@ class PlayGame:
                 move = chess.Move.from_uci(str(chess.Move(self.selected_square, clicked_square))+"q")
             else:
                 move = chess.Move(self.selected_square, clicked_square)
-            if move in self.board.legal_moves:
+            if move in self.board.pseudo_legal_moves:
                 
                 # end of og onto new way to stop castling problem
                 # Check if this is a castling move:
@@ -92,24 +91,13 @@ class PlayGame:
                         self.database.move_list.append(move.uci())
                     self.database.update_database(self.selected_square, clicked_square, self.is_white_turn)
                 
-                ## back to og (DO NOT REMOVE UNTIL TESTED FULLY)
-                # self.capture_piece(clicked_square, self.selected_square)
-                # self.board.push(move)
-                # self.update_pieces()
-                ## Store the move in the move list
-                # if self.is_white_turn:
-                #     self.move_list.append(move.uci())
-                ## Update the database
-                # self.update_database(self.selected_square, clicked_square)
-
-
                 # updates the visibility part of the database for player 1's perspective only
                 # I have it set to not because where it is located it will see the next player 1's move options therefore after the piece is moved
                 if not self.is_white_turn:
-                    self.database.update_visibility_white(list(self.board.legal_moves))
+                    self.database.update_visibility_white(list(self.board.pseudo_legal_moves))
                 
                 if self.is_white_turn:
-                    self.database.update_visibility_black(list(self.board.legal_moves))
+                    self.database.update_visibility_black(list(self.board.pseudo_legal_moves))
 
                 # Check for game-ending conditions
                 if self.game_over.check_game_over(self.is_white_turn):
@@ -177,18 +165,16 @@ class PlayGame:
         captured_piece = self.board.piece_at(clicked_square)
         print("I made it here! I am going to capture", captured_piece)
         if captured_piece: # if captured_piece is not None
+            #if capture_piece 
             print("I actually captured", captured_piece, "here!")
-            # dictionary
-            piece_color = 'W' if captured_piece.color else 'B'
-            self.captured_pieces[piece_color].append(captured_piece.symbol())
-            # table version
-            self.cursor.execute("INSERT INTO captured (color, piece) VALUES (?, ?)", (piece_color, captured_piece.symbol()))
+            self.cursor.execute("INSERT INTO captured (piece) VALUES (?)", (captured_piece.symbol()))
+
         # if (self.board.piece_at(selected_square) == 'P' or self.board.piece_at(selected_square) == 'p') and (clicked_square >= 56 or clicked_square <= 7):
         #     promote()
 
     def show_possible_moves(self, square):
         """Show dots on squares where the selected piece can move."""
-        for move in self.board.legal_moves:
+        for move in self.board.pseudo_legal_moves:
             if move.from_square == square:
                 # Calculate the position of the destination square
                 to_col = chess.square_file(move.to_square)

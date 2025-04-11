@@ -30,7 +30,6 @@ class Database:
         self.cursor.execute("DROP TABLE IF EXISTS captured")
         self.cursor.execute("""
         CREATE TABLE captured (
-            color CHAR(1),
             piece CHAR(1)
         )
         """)

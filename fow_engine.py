@@ -6,6 +6,8 @@ from output_processor import OutputProcessor
 #from prediction_tree import PredictionTree
 import platform
 from bias_eval import BiasScorer
+import tkinter as tk
+from tkinter import messagebox
 
 
 class FoW_Engine1:
@@ -251,6 +253,9 @@ class FoW_Engine1:
             print("Suggested Moves for White:")
             for i, (move, score) in enumerate(scored_guesses[:max_guesses]):
                 print(f"{i + 1}. Move: {move}, Score: {score}")
+
+            messagebox.showinfo("Move Suggestions", scored_guesses)
+
 
         finally:
             try:

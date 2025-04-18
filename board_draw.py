@@ -27,7 +27,7 @@ class DrawBoard:
     
     def draw_board(self):
         """Draw the chessboard on the canvas."""
-        colors = ["#f5ffff", "#363838"]  # Light and dark squares
+        colors = ["#d6c0a8", "#51361a"]  # Light and dark squares
         for row in range(self.board_size):
             for col in range(self.board_size):
                 color = colors[(row + col) % 2]

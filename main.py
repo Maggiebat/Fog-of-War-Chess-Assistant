@@ -57,15 +57,14 @@ class ChessGUI:
         # Bind click events to the board
         self.canvas.bind("<Button-1>", self.play_game.on_square_click)
         # Creates a button that prints the board state **debug feature**
-        print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
-        print_button.pack(side=tk.LEFT)
+        # print_button = tk.Button(self.root, text="Print Board State", command=self.print_board_state)
+        # print_button.pack(side=tk.LEFT)
         # Makes it so you can hit Escape to leave the game
         self.root.bind("<Escape>", lambda event: self.game_over.quit_game())
         # # Create a button to print the moves made in the game
         # self.move_list = []
-        print_moves_button = tk.Button(self.root, text="Print Move History", command=self.database.print_moves)
-        print_moves_button.pack(side=tk.LEFT)
-        
+        # print_moves_button = tk.Button(self.root, text="Print Move History", command=self.database.print_moves)
+        # print_moves_button.pack(side=tk.LEFT)
         print_captured_button = tk.Button(self.root, text="Print Captured Pieces", command=self.print_captured_pieces)
         print_captured_button.pack(side=tk.LEFT)
         # ran here once to set up original visibility for player 1

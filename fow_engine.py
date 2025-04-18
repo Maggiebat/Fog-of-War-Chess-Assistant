@@ -32,7 +32,6 @@ class FoW_Engine1:
         self.board.clear()
         self.bias = bias_dict
         self.bias_scorer = BiasScorer(self.bias)
-        self.bias_scorer = BiasScorer(self.bias)
         print(f"[DEBUG] Bias config loaded: {self.bias}")
         # self.prediction_tree = PredictionTree(self.board, initial_turn=0)  # Temporarily disabled for trial
 
@@ -254,7 +253,7 @@ class FoW_Engine1:
             for i, (move, score) in enumerate(scored_guesses[:max_guesses]):
                 print(f"{i + 1}. Move: {move}, Score: {score}")
 
-            messagebox.showinfo("Move Suggestions", scored_guesses)
+            messagebox.showinfo("Top 5 Move Suggestions and Scores", scored_guesses)
 
 
         finally:

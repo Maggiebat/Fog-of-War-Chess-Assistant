@@ -5,6 +5,7 @@ The Fog of War Chess Assistant is a unique tool that enhances gameplay in the ch
 ---
 
 Team: Raquel Ana Bush (lead), Margaret Battersby (scrum master), Grace Warila (notetaker), Brian Kade Betterton, Henry Thompson, Chun Lee
+
 ---
 
 ## Running the Program

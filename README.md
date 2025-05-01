@@ -23,6 +23,7 @@ Team:
 3. Install dependencies:
    
    Make sure you have Python 3 installed.
+   Run the following command in the terminal:
    ```python
    pip install chess requests
 

@@ -22,9 +22,8 @@ Team:
 
 3. Install dependencies:
    Make sure you have Python 3 installed.
-   '''
+   ```python
    pip install chess requests
-   '''
 
 4. Run main.py to:
    - Start the game.

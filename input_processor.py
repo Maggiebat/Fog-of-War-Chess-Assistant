@@ -5,12 +5,12 @@ from tkinter import simpledialog
 
 class InputProcessor:
     def __init__(self):
-        # Hugging Face API key
+        # Hugging Face API key:
         self.api_key = "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"
         self.mistral_api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
-    # Step 1: Get structured response from Mistral
+    # get structured response from Mistral:
     def get_mistral_output(self, user_input):
         prompt = (
             "You are a helpful assistant. Respond **only** in JSON format with these fields:\n"
@@ -34,13 +34,13 @@ class InputProcessor:
                 print("Warning: Empty response from Mistral")
                 return None
 
-            # print("🔍 Raw Mistral Output:", raw_output)  # for debugging
+            # print("Raw Mistral Output:", raw_output)  # for debugging
             return self.extract_json(raw_output)
         else:
             print(f"API Error: {response.status_code} - {response.text}")
             return None
 
-    # Extracts only the JSON portion from Mistral's response
+    # extracts only the JSON portion from Mistral's response:
     def extract_json(self, response_text):
         """
         Removes unnecessary text and extracts only the JSON portion.
@@ -59,7 +59,7 @@ class InputProcessor:
             print(f"JSON Extraction Error: {e}")
             return None
 
-    # Parses JSON safely
+    # parses JSON:
     def parse_structured_data(self, json_string):
         """
         Parses the extracted JSON safely.
@@ -90,13 +90,12 @@ class InputProcessor:
         input_value = simpledialog.askstring("Input", "Hello, what would you like me to do:")
         if input_value:
             print("User input:", input_value)
-            result = self.main(input_value)  # Process the input
-            return result  # Return the structured data directly
+            result = self.main(input_value)
+            return result
         else:
             print("No input provided.")
             return None
 
-    # Main function to process user input
     def main(self, user_input):
         output_str = self.get_mistral_output(user_input)
 
@@ -109,7 +108,7 @@ class InputProcessor:
 
 if __name__ == "__main__":
     processor = InputProcessor()
-    result = processor.bias()  # This returns structured data directly
+    result = processor.bias()
 
     if result:
         print('\n', "Processed Output:", result, '\n')
